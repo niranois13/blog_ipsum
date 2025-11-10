@@ -1,0 +1,84 @@
+services:
+    # --------------------------
+    # Backend (Express + Sequelize)
+    # --------------------------
+    server:
+        build:
+            context: ./server
+            dockerfile: Dockerfile
+        container_name: blogipsum-server
+        volumes:
+            - ./server:/blog_ipsum       # code local → container pour hot reload
+            - /blog_ipsum/node_modules   # éviter d'écraser node_modules du conteneur
+        ports:
+            - "3000:3000"
+        env_file:
+            - .env                       # variables d'environnement (DB, etc.)
+        command: npx nodemon src index.js
+        networks:
+            - blog-network
+        depends_on:
+            - db
+
+# --------------------------
+# Frontend (React + Vite)
+# --------------------------
+    web:
+        build:
+            context: ./web
+            dockerfile: Dockerfile
+        container_name: blogipsum-web
+        volumes:
+            - ./web:/blog_ipsum
+            - /blog_ipsum/node_modules
+        ports:
+            - "5173:5173"
+        environment:
+            - CHOKIDAR_USEPOLLING=true
+        networks:
+            - blog-network
+
+# --------------------------
+# MySQL Database
+# --------------------------
+    db:
+        image: mysql:8.0
+        container_name: blogipsum-db
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_DATABASE: ${DB_NAME}
+            MYSQL_USER: ${DB_USER}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+        ports:
+            - "3306:3306"
+        volumes:
+            - mysql_data:/var/lib/mysql
+        networks:
+            - blog-network
+
+# -------------------------
+# Reverse Proxy (Nginx)
+# --------------------------
+    proxy:
+        build:
+            context: ./proxy
+            dockerfile: Dockerfile
+        container_name: blogipsum-proxy
+        ports:
+            - "80:80"
+        depends_on:
+            - web
+            - server
+        networks:
+            - blog-network
+
+# --------------------------
+# Réseaux et volumes
+# --------------------------
+networks:
+    blog-network:
+        driver: bridge
+
+volumes:
+    mysql_data:
