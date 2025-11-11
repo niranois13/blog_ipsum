@@ -1,6 +1,6 @@
 # 🧭 Fullstack Blog Project - TODO.md
 
-📅 Start Date: 19 Oct 2025  
+📅 Start Date: 19 Oct 2025
 🎯 Goal: Functional MVP + Deployment (maybe)
 💡 Style: Solo dev, modular, testable (if enough coffee)
 
@@ -9,34 +9,34 @@
 ## 1️⃣ Environment Setup - Where the magic begins
 
 - [ ] **Backend setup**
-    - [ ] Create `server/`
+    - [x] Create `server/`
     - [ ] Subfolders: `core/`, `auth/`, `article/`, `comment/`, `utils` for backend
     - [ ] Subsubfolders: [] `auth/authMiddleware`, [] `auth/authControllers`, [] `auth/authServices`; [] `article/Middleware`, [] `article/articleController`, [] `article/articleServices`; [] `comment/commentMiddleware`, [] `comment/commentController`, [] `comment/commentServices`, [] `utils/imageUtils`, [] `utils/commentUtils`
-    - [ ] Initialize `server/package.json`
+    - [x] Initialize `server/package.json`
         - [ ] Install: express, bcrypt, jsonwebtoken, cookie-parser, dotenv
     - [ ] Create `server/core/server.js` with a "Hello World" route
     - [ ] Configure `server/core/routes.js` for basic route structure
 
-- [ ] **Database setup**
-    - [ ] Install & run MySQL
-    - [ ] Connect backend to MySQL
+- [] **Database setup**
+    - [x] Install & run MySQL
+    - [x] Connect backend to MySQL
     - [ ] Create route `/db/health` → returns `{ status: "OK", timestamp: ... }` for sanity checks
 
 - [ ] **Frontend setup**
-    - [ ] Create Vite app: `web/`
-    - [ ] Install libraries: Zod, TanStack Query, Quill, glin-profanity, TailwindCSS
+    - [x] Create Vite app: `web/`
+    - [x] Install libraries: Zod, TanStack Query, Quill, glin-profanity, TailwindCSS
     - [ ] Configure basic folder structure (`src/components`, `src/hooks`, `src/assets`, `src/utilities`)
 
-- [ ] **Proxy setup**
-    - [ ] Nginx config: forward `/api` to backend, `/` to frontend
+- [x] **Proxy setup**
+    - [x] Nginx config: forward `/api` to backend, `/` to frontend
 
 - [ ] **Docker setup**
-    - [ ] `Dockerfile` for backend
-    - [ ] `Dockerfile` for frontend
-    - [ ] `docker-compose.yml`
-        - [ ] Services: backend, frontend, proxy, database
-        - [ ] Hot reload + logs in terminal
-    - [ ] Test `docker-compose up` → everything should at least blink green
+    - [x] `Dockerfile` for backend
+    - [x] `Dockerfile` for frontend
+    - [x] `docker-compose.yml`
+        - [x] Services: backend, frontend, proxy, database
+        - [x] Hot reload + logs in terminal
+    - [x] Test `docker-compose up` → everything should at least blink green
 
 - [ ] **Cloudinary setup**
     - [ ] Create account, get API keys

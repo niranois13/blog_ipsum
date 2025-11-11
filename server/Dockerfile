@@ -1,12 +1,12 @@
 FROM node:20-alpine
 
-WORKDIR /blog_ipsum
+WORKDIR /blog_ipsum/server
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm install -g pnpm nodemon && npm install --frozen-lockfile
 
-COPY . .
+COPY server/. .
 EXPOSE 3000
 
-CMD ["npx", "nodemon", "src", "index.js"]
+CMD ["npx", "nodemon", "src/index.js"]

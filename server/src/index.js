@@ -5,10 +5,15 @@ import { Sequelize } from "sequelize";
 const app = express();
 const port = process.env.SERVER_PORT;
 
-const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
-    host: process.env.DB_HOST,
-    dialect: "mysql",
-})
+const sequelize = new Sequelize(
+    process.env.DB_NAME,
+    process.env.DB_USER,
+    process.env.DB_PASSWORD,
+    {
+        host: process.env.DB_HOST,
+        dialect: "mysql",
+    }
+);
 
 async function connectWithRetry(retries = 10, delay = 2000) {
     for (let i = 0; i < retries; i++) {
@@ -25,6 +30,12 @@ async function connectWithRetry(retries = 10, delay = 2000) {
 }
 
 connectWithRetry();
+
+
+app.get("/api", (req, res) => {
+    res.send("Hi :)");
+});
+
 
 app.listen(port, () => {
     console.log(`Server up and running on port ${port}`);
