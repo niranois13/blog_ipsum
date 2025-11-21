@@ -15,32 +15,32 @@ Finally, accessibility will be inforced.
 ### The Teck Stack
 
 - Docker
-- Nginx v1.27.1
+- Ngin
 
 - Root (shared):
 
-* ESLint v9.39.1
-* Prettier v3.6.2
-* Jest 29.7.0
-* Supertest 7.0.0
+* ESLint
+* Prettier
+* Jest (to come)
+* Supertest (to come)
 
 - Back-end:
 
-* NodeJS v24.11.0
+* NodeJS
 * Express
 * Sequelize
-* bcryptjs v2.4.3
-* MySQL v8.4.2
-* mysql2 v3.11.3
+* bcryptjs
+* MySQL
+* jsonwebtoken
+* cookie-parser
 
-- Front-end:
+- Front-end (not started yet):
 
-* React v18.3.1
-* TanStack Query V5.50
-* Zod v3.23.8
-* Quill v2.0.3
-* GlinProfanity (local) v.1.2.0
-* ESLint
+* React
+* TanStack Query
+* Zod
+* Quill ()
+* GlinProfanity (local)
 
 ### Architecure
 
@@ -49,3 +49,35 @@ Finally, accessibility will be inforced.
 ### UML Class diagram
 
 ![uml class diagram](https://i.imgur.com/QTTB2wa.png)
+
+## Usage
+
+In order for this project to run, you first need to have Docker installed and running.
+
+Clone this repository:
+`git clone https://github.com/niranois13/blog_ipsum.git`
+
+Rename `.env-example` as `.env` and replace placeholder values to real ones __(never push a .env <3)__
+
+Then, while at project's root, run:
+`npm run dev`, a script that will run `docker-compose up --build`
+This will build and run the needed Docker containers and volumes.
+
+You can now test the project at `localhost/`, the api running on `localhost/api/`
+
+
+### Other available scripts:
+
+* `npm run lint` / `npm run lint:fix` that will check/fix code formating and some errors thanks to ESLint/Prettier.
+* `npm run format` to check and fix code format thanks to Prettier only.
+* `npm run stop` to fully stop the Docker containers (volumes are safe).
+* `npm run build` to build the Docke image, without running it.
+* `npm run test` to run jest tests. Not implemented yet.
+
+
+## Features
+
+- Admin panel with a WYSIWYG text editor: Quill, in order to create and manage articles. Also a comment management system.
+- The possibility for visitors to post comments. Those comments are moderated with glin-profanity, some RegEx and some spam limitations and bot control.
+- Everything is stored in a MySQL database, except for article's cover images that are stored on Cloudinary.
+- Room for scalability. 
