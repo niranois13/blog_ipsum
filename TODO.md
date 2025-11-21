@@ -10,12 +10,11 @@
 
 - [ ] **Backend setup**
     - [x] Create `server/`
-    - [ ] Subfolders: `core/`, `auth/`, `article/`, `comment/`, `utils` for backend
-    - [ ] Subsubfolders: [] `auth/authMiddleware`, [] `auth/authControllers`, [] `auth/authServices`; [] `article/Middleware`, [] `article/articleController`, [] `article/articleServices`; [] `comment/commentMiddleware`, [] `comment/commentController`, [] `comment/commentServices`, [] `utils/imageUtils`, [] `utils/commentUtils`
+    - [ ] Subfolders: `src/`, `models/`, `controllers/`, `services/`, `utils`, `middlewares`, `routes` for backend
     - [x] Initialize `server/package.json`
-        - [ ] Install: express, bcrypt, jsonwebtoken, cookie-parser, dotenv
-    - [ ] Create `server/core/server.js` with a "Hello World" route
-    - [ ] Configure `server/core/routes.js` for basic route structure
+        - [x] Install: express, bcrypt, jsonwebtoken, cookie-parser
+    - [x] Create `server/src/index.js`
+    - [ ] Configure `server/src/routes.js` for basic route structure
 
 - [] **Database setup**
     - [x] Install & run MySQL
@@ -48,13 +47,13 @@
 
 => cf UML Class Diagramm
 
-- [ ] **BaseModel** (id, createdAt, updatedAt => all private)
-- [ ] **User**
-    - [ ] username, email, password => all private, role (protected)
-- [ ] **Article**
-    - [ ] title, summary, content (JSON stringified), image, status
-- [ ] **Comment**
-    - [ ] text, review, userId (nullable), articleId
+- [x] **BaseModel** (id, createdAt, updatedAt => all private)
+- [x] **User**
+    - [x] username, email, password, role
+- [x] **Article**
+    - [x] title, summary, content (JSON stringified), image (cloudinary URL), status
+- [x] **Comment**
+    - [x] text, userId (nullable), articleId
 
 - [ ] **Sequelize associations**
     - [ ] User.hasMany(Article)

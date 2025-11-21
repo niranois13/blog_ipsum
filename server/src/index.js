@@ -1,42 +1,68 @@
 import express from "express";
-import mysql from "mysql";
 import { Sequelize } from "sequelize";
+import initUser from "../models/User.js";
+import initArticle from "../models/Article.js";
+import initComment from "../models/Comment.js";
+import initCommentStats from "../models/CommentStats.js";
+import applyAssociations from "../models/index.js";
 
 const app = express();
 const port = process.env.SERVER_PORT;
 
-const sequelize = new Sequelize(
-    process.env.DB_NAME,
-    process.env.DB_USER,
-    process.env.DB_PASSWORD,
-    {
-        host: process.env.DB_HOST,
-        dialect: "mysql",
-    }
-);
+const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
+    host: process.env.DB_HOST,
+    dialect: "mysql",
+});
 
 async function connectWithRetry(retries = 10, delay = 2000) {
     for (let i = 0; i < retries; i++) {
         try {
             await sequelize.authenticate();
             console.log("Connected to MySQL");
-            return;
-        } catch (err) {
-            console.log(`MySQL connection failed. Retry ${i + 1}/${retries}...`);
-            await new Promise(r => setTimeout(r, delay));
+            return true;
+        } catch (error) {
+            console.log("MySQL connection failed: ", error.message);
+            await new Promise((r) => setTimeout(r, delay));
+            return false;
         }
     }
+
     console.error("Unable to connect to MySQL after multiple retries.");
+    return false;
 }
 
-connectWithRetry();
+async function synchroModels() {
+    try {
+        const User = initUser(sequelize);
+        const Article = initArticle(sequelize);
+        const Comment = initComment(sequelize);
+        const CommentStats = initCommentStats(sequelize);
 
+        applyAssociations({ User, Article, Comment, CommentStats });
 
-app.get("/api", (req, res) => {
-    res.send("Hi :)");
-});
+        console.log("Starting model synchronization...");
+        await sequelize.sync({ alter: true });
 
+        console.log("Models synchronized successfully.");
+        return true;
+    } catch (error) {
+        console.error("Model synchronization failed:", error);
+        return false;
+    }
+}
 
-app.listen(port, () => {
-    console.log(`Server up and running on port ${port}`);
-});
+async function startServer() {
+    const connected = await connectWithRetry();
+    if (!connected) return;
+
+    const synchronized = await synchroModels();
+    if (!synchronized) {
+        return;
+    }
+
+    app.listen(port, () => {
+        console.log(`Server up and running on port ${port}`);
+    });
+}
+
+startServer();

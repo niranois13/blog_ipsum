@@ -33,7 +33,7 @@ services:
         environment:
             - CHOKIDAR_USEPOLLING=true
         expose:
-            - '5173'
+            - "5173"
 
     db:
         image: mysql:8.0
@@ -67,3 +67,9 @@ services:
 
 volumes:
     mysql_data:
+
+networks:
+    default:
+        driver: bridge
+        driver_opts:
+            com.docker.network.enable_ipv6: "false"
