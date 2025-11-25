@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 import BaseModel from "./BaseModel.js";
 
 export default function (sequelize) {
-    class User extends BaseModel {}
+    class User extends BaseModel { }
 
     User.init(
         {
@@ -54,8 +54,29 @@ export default function (sequelize) {
                     }
                 },
             },
+            hooks: {
+                beforeUpdate(user) {
+                    if (user.changed("ipHash")) {
+                        throw new Error("ipHash cannot be modified.");
+                    }
+                }
+            },
+            defaultScope: {
+                attributes: {
+                    exclude: ['password']
+                },
+                order: [
+                    ['createdAt', 'DESC']
+                ]
+            }
         }
     );
+
+    User.prototype.toJSON = function () {
+        const values = { ...this.get() };
+        delete values.password;
+        return values;
+    };
 
     return User;
 }

@@ -1,10 +1,8 @@
 import express from "express";
 import { Sequelize } from "sequelize";
-import initUser from "../models/User.js";
-import initArticle from "../models/Article.js";
-import initComment from "../models/Comment.js";
-import initCommentStats from "../models/CommentStats.js";
-import applyAssociations from "../models/index.js";
+import setupModels from "../models/index.js";
+import exportPublicRoutes from "../routes/publicRoutes.js";
+import exportAdminRoutes from "../routes/adminRoutes.js";
 
 const app = express();
 const port = process.env.SERVER_PORT;
@@ -33,17 +31,13 @@ async function connectWithRetry(retries = 10, delay = 2000) {
 
 async function synchroModels() {
     try {
-        const User = initUser(sequelize);
-        const Article = initArticle(sequelize);
-        const Comment = initComment(sequelize);
-        const CommentStats = initCommentStats(sequelize);
+        const models = setupModels(sequelize);
 
-        applyAssociations({ User, Article, Comment, CommentStats });
-
-        console.log("Starting model synchronization...");
-        await sequelize.sync({ alter: true });
-
+        await sequelize.sync({ force: true });
         console.log("Models synchronized successfully.");
+
+        app.locals.models = models;
+
         return true;
     } catch (error) {
         console.error("Model synchronization failed:", error);
@@ -53,12 +47,16 @@ async function synchroModels() {
 
 async function startServer() {
     const connected = await connectWithRetry();
-    if (!connected) return;
+    if (!connected)
+        return;
 
     const synchronized = await synchroModels();
-    if (!synchronized) {
+    if (!synchronized)
         return;
-    }
+
+    app.use(express.json());
+    exportAdminRoutes(app)
+    exportPublicRoutes(app);
 
     app.listen(port, () => {
         console.log(`Server up and running on port ${port}`);

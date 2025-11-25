@@ -1,4 +1,9 @@
-export default function applyAssociations(models) {
+import initUser from "../models/User.js";
+import initArticle from "../models/Article.js";
+import initComment from "../models/Comment.js";
+import initCommentStats from "../models/CommentStats.js";
+
+function applyAssociations(models) {
     const { User, Article, Comment, CommentStats } = models;
 
     User.hasMany(Article, {
@@ -43,4 +48,22 @@ export default function applyAssociations(models) {
         foreignKey: "userId",
         as: "user",
     });
+
+    return models;
+}
+
+function initModels(sequelize) {
+    const User = initUser(sequelize);
+    const Article = initArticle(sequelize);
+    const Comment = initComment(sequelize);
+    const CommentStats = initCommentStats(sequelize);
+
+    return { User, Article, Comment, CommentStats };
+}
+
+export default function setupModels(sequelize) {
+    const models = initModels(sequelize);
+    applyAssociations(models);
+
+    return models;
 }
