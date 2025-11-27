@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 import BaseModel from "./BaseModel.js";
 
 export default function (sequelize) {
-    class CommentStats extends BaseModel { }
+    class CommentStats extends BaseModel {}
 
     CommentStats.init(
         {

@@ -47,15 +47,13 @@ async function synchroModels() {
 
 async function startServer() {
     const connected = await connectWithRetry();
-    if (!connected)
-        return;
+    if (!connected) return;
 
     const synchronized = await synchroModels();
-    if (!synchronized)
-        return;
+    if (!synchronized) return;
 
     app.use(express.json());
-    exportAdminRoutes(app)
+    exportAdminRoutes(app);
     exportPublicRoutes(app);
 
     app.listen(port, () => {

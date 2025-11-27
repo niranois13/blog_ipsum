@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 import BaseModel from "./BaseModel.js";
 
 export default function (sequelize) {
-    class User extends BaseModel { }
+    class User extends BaseModel {}
 
     User.init(
         {
@@ -59,16 +59,14 @@ export default function (sequelize) {
                     if (user.changed("ipHash")) {
                         throw new Error("ipHash cannot be modified.");
                     }
-                }
+                },
             },
             defaultScope: {
                 attributes: {
-                    exclude: ['password']
+                    exclude: ["password"],
                 },
-                order: [
-                    ['createdAt', 'DESC']
-                ]
-            }
+                order: [["createdAt", "DESC"]],
+            },
         }
     );
 

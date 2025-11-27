@@ -3,96 +3,104 @@ import {
     getAllArticlesService,
     getArticleByIdService,
     deleteArticleService,
-    createArticleService
+    createArticleService,
 } from "../../services/articleService.js";
 
-function checkQuillObject(content) {
-    if (typeof content !== "object")
-        return false
-    if (!Array.isArray(content.ops))
-        return false
-    for (const op of content.ops) {
-        if (typeof op !== "object" || !('insert' in op))
-            return false
-    }
-    return true
-}
+// function checkCloudinaryObject(responseCloudinary) {
+//     if (typeof responseCloudinary !== "object")
+//         return false;
+//     if (responseCloudinary.resource_type !== "image")
+//         return false;
+//     if (!["jpg", "jpeg", "png", "webp", "avif"].includes(responseCloudinary.format))
+//         return false;
+//     if (!responseCloudinary.secure_url.startsWith('https://res.cloudinary.com/'))
+//         return false;
+//     return true;
+// }
 
-function checkCloudinaryObject(responseCloudinary) {
-    if (typeof responseCloudinary !== "object")
-        return false;
-    if (responseCloudinary.resource_type !== "image")
-        return false;
-    if (!["jpg", "jpeg", "png", "webp", "avif"].includes(responseCloudinary.format))
-        return false;
-    if (!responseCloudinary.secure_url.startsWith('https://res.cloudinary.com/'))
-        return false;
+function checkQuillObject(content) {
+    if (typeof content !== "object") return false;
+    if (!Array.isArray(content.ops)) return false;
+    for (const op of content.ops) {
+        if (typeof op !== "object" || !("insert" in op)) return false;
+    }
     return true;
 }
 
-export async function createArticle(responseCloudinary, req, res) {
-    const models = req.app.locals.models;
-    if (!models)
-        return res.status(404).json({ error: "Not found" });
+function formatInvalidTitle(title) {
+    if (typeof title !== "string" || title.length < 1 || title.length > 120) {
+        const date = new Date();
+        const day = date.toLocaleDateString("fr-FR", { timeZone: "UTC" });
+        const hours = date.toLocaleTimeString("fr-FR", { timeZone: "UTC", hour12: false });
+        title = `New article: ${day} - ${hours} UTC`;
+    }
+    return title;
+}
 
-    let { title, summary, content, status } = req.body
-    if (!status || !content || !responseCloudinary) {
-        return res.status(400).json({ error: "Missing parameters" });
+function formatInvalidSummary(summary) {
+    if (typeof summary !== "string" || summary.length < 1 || summary.length > 400) {
+        summary = "Enter a valid summary of the article, max 400 characters.";
+    }
+    return summary;
+}
+
+function validateArticle(input, isUpdate) {
+    const { title, summary, content, cover, status } = input;
+
+    if (!status || !content || !cover) {
+        return { valid: false, error: "Missing Parameters" };
     }
 
-    let cover = null;
-
-    if (!(["DRAFT", "PUBLISHED", "ARCHIVED"].includes(status)))
-        return res.status(400).json({ error: "Invalid status." });
-
-    if (!checkQuillObject(content))
-        return res.status(400).json({ error: "Invalid Quill content." })
-
-    if (!checkCloudinaryObject(responseCloudinary))
-        return res.status(400).json({ error: "Invalid Cloudinary content." })
-    cover = responseCloudinary.secure_url || null;
-
-    if (status && status === "DRAFT") {
-        if (title == undefined) {
-            const date = new Date();
-            const day = date.toLocaleDateString("fr-FR", { timeZone: "UTC" });
-            const hours = date.toLocaleTimeString("fr-FR", { timeZone: "UTC", hour12: false });
-            title = `New draft: ${day} - ${hours} UTC`;
-        };
-        if (summary == undefined) {
-            summary = "Present your article here, max 400 characters.";
-        };
+    let allowedStatus = [];
+    if (isUpdate) {
+        allowedStatus = ["DRAFT", "PUBLISHED", "ARCHIVED"];
     } else {
-        title = title.trim();
-        summary = summary.trim();
-        if ((typeof title !== "string") || title.length < 1 || title.length > 120)
-            return res.status(400).json({ error: "Invalid title format" });
-        if ((typeof summary !== "string") || summary.length < 1 || summary.length > 400)
-            return res.status(400).json({ error: "Invalid summary format" });
+        allowedStatus = ["DRAFT", "PUBLISHED"];
     }
+    if (!allowedStatus.includes(status)) return { valid: false, error: "Invalid status" };
+
+    if (!checkQuillObject(content)) return { valid: false, error: "Invalid Quill content" };
+
+    if (typeof cover !== "string" || !cover.startsWith("https://res.cloudinary.com/"))
+        return { valid: false, error: "Invalid Cloudinary content" };
+
+    const safeTitle = formatInvalidTitle(title);
+    const safeSummary = formatInvalidSummary(summary);
+
+    return {
+        valid: true,
+        data: {
+            title: safeTitle,
+            summary: safeSummary,
+            content,
+            cover,
+            status,
+        },
+    };
+}
+
+export async function createArticle(req, res) {
+    const models = req.app.locals.models;
+    if (!models) return res.status(500).json({ error: "No valid model" });
+
+    const validation = validateArticle(req.body, false);
+    if (!validation.valid) return res.status(400).json({ error: validation.error });
 
     try {
-        const article = await createArticleService({
-            title,
-            cover,
-            summary,
-            content,
-            status
-        }, models)
+        const article = await createArticleService(validation.data, models);
 
         return res.status(201).json({ article });
     } catch (error) {
-        return res.status(500).json({ error: error.message })
+        return res.status(500).json({ error: error.message });
     }
 }
 
 export async function getAllArticles(req, res) {
     const models = req.app.locals.models;
-    if (!models)
-        return res.status(404).json({ error: "Not found" });
+    if (!models) return res.status(404).json({ error: "Not found" });
 
     try {
-        const articles = await getAllArticlesService(models)
+        const articles = await getAllArticlesService(models);
 
         return res.status(200).json(articles);
     } catch (error) {
@@ -102,12 +110,11 @@ export async function getAllArticles(req, res) {
 
 export async function getArticleById(req, res) {
     const models = req.app.locals.models;
-    const id = req.params.id
-    if (!models || !id)
-        return res.status(404).json({ error: "Not found" });
+    const id = req.params.id;
+    if (!models || !id) return res.status(404).json({ error: "Not found" });
 
     try {
-        const article = await getArticleByIdService(id, models)
+        const article = await getArticleByIdService(id, models);
 
         return res.status(200).json(article);
     } catch (error) {
@@ -117,9 +124,8 @@ export async function getArticleById(req, res) {
 
 export async function deleteArticle(req, res) {
     const models = req.app.locals.models;
-    const id = req.params.id
-    if (!models || !id)
-        return res.status(404).json({ error: "Not found" });
+    const id = req.params.id;
+    if (!models || !id) return res.status(404).json({ error: "Not found" });
 
     try {
         const article = await deleteArticleService(id, models);
@@ -130,59 +136,20 @@ export async function deleteArticle(req, res) {
     }
 }
 
-export async function updateArticle(responseCloudinary, req, res) {
+export async function updateArticle(req, res) {
     const models = req.app.locals.models;
     const id = req.params.id;
-    if (!models || !id)
-        return res.status(404).json({ error: "Not found" });
+    if (!models) return res.status(500).json({ error: "No valid model" });
+    if (!id) return res.status(404).json({ error: "Not Found" });
 
-    let { title, summary, content, status } = req.body
-    if (!status || !content || !responseCloudinary) {
-        return res.status(400).json({ error: "Missing parameters" });
-    }
-
-    let cover = null;
-
-    if (!(["DRAFT", "PUBLISHED", "ARCHIVED"].includes(status)))
-        return res.status(400).json({ error: "Invalid status." });
-
-    if (!checkQuillObject(content))
-        return res.status(400).json({ error: "Invalid Quill content." })
-
-    if (!checkCloudinaryObject(responseCloudinary))
-        return res.status(400).json({ error: "Invalid Cloudinary content." })
-    cover = responseCloudinary.secure_url || null;
-
-    if (status && status === "DRAFT") {
-        if (title == undefined || title.startsWith('New draft:')) {
-            const date = new Date();
-            const day = date.toLocaleDateString("fr-FR", { timeZone: "UTC" });
-            const hours = date.toLocaleTimeString("fr-FR", { timeZone: "UTC", hour12: false });
-            title = `New draft: ${day} - ${hours} UTC`;
-        };
-        if (summary == undefined) {
-            summary = "Present your article here, max 400 characters.";
-        };
-    } else {
-        title = title.trim();
-        summary = summary.trim();
-        if ((typeof title !== "string") || title.length < 1 || title.length > 120)
-            return res.status(400).json({ error: "Invalid title format" });
-        if ((typeof summary !== "string") || summary.length < 1 || summary.length > 400)
-            return res.status(400).json({ error: "Invalid summary format" });
-    }
+    const validation = validateArticle(req.body, true);
+    if (!validation.valid) return res.status(400).json({ error: validation.error });
 
     try {
-        const article = await updateArticleService({
-            title,
-            cover,
-            summary,
-            content,
-            status
-        }, models)
+        const article = await updateArticleService(validation.data, id, models);
 
         return res.status(200).json({ article });
     } catch (error) {
-        return res.status(500).json({ error: error.message })
+        return res.status(500).json({ error: error.message });
     }
 }

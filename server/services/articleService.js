@@ -1,83 +1,64 @@
+import { buildCommentTree } from "./utils/buildCommentTree.js";
+
 export async function createArticleService(data, models) {
-    try {
-        const { Article } = models;
+    const { Article } = models;
 
-        return await Article.create({
-            title: data.title,
-            cover: data.cover,
-            summary: data.summary,
-            content: data.content,
-            status: data.status
-        });
-    } catch (error) {
-        if (error.name === "SequelizeUniqueConstraintError")
-            throw new Error("Duplicate entry in postArticle");
-
-        throw error;
-    }
+    return await Article.create({
+        title: data.title,
+        cover: data.cover,
+        summary: data.summary,
+        content: data.content,
+        status: data.status,
+    });
 }
 
 export async function updateArticleService(articleId, data, models) {
-    try {
-        const { Article } = models;
+    const { Article } = models;
 
-        const article = await Article.findByPk(articleId);
-        if (!article)
-            throw new Error("User not found");
+    const article = await Article.findByPk(articleId);
+    if (!article) throw new Error("Article not found");
 
-        await article.update(data);
+    await article.update(data);
 
-        return article;
-    } catch (error) {
-        if (error.name === "SequelizeUniqueConstraintError")
-            throw new Error("Duplicate entry in patchArticle")
-
-        throw error;
-    }
+    return article;
 }
 
 export async function getAllArticlesService(models) {
-    try {
-        const { Article } = models;
+    const { Article } = models;
 
-        const articles = await Article.findAll({
-            order: [
-                ['createdAt', 'ASC']
-            ]
-        });
+    const articles = await Article.findAll({
+        order: [["createdAt", "ASC"]],
+    });
 
-        return articles;
-    } catch (error) {
-        throw error;
-    }
+    return articles;
 }
 
 export async function getArticleByIdService(articleId, models) {
-    try {
-        const { Article } = models;
+    const { Article, Comment } = models;
 
-        const article = await Article.findByPk(articleId);
-        if (!article)
-            throw new Error("Article not found");
+    const article = await Article.findByPk(articleId);
+    if (!article) throw new Error("Article not found");
 
-        return article;
-    } catch (error) {
-        throw error;
-    }
+    const comments = await Comment.findAll({
+        where: { id: articleId },
+        order: [["createdAt", "ASC"]],
+    });
+
+    const commentTree = buildCommentTree(comments);
+
+    return {
+        article,
+        commentTree,
+    };
 }
 
 export async function deleteArticleService(articleId, models) {
-    try {
-        const { Article } = models;
+    const { Article } = models;
 
-        const article = await Article.findByPk(articleId);
-        if (!article)
-            throw new Error("Article not found");
+    const article = await Article.findByPk(articleId);
+    if (!article) throw new Error("Article not found");
 
-        await article.destroy()
+    await article.destroy();
 
-        return article;
-    } catch (error) {
-        throw error;
-    }
+    return article;
 }

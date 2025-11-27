@@ -1,12 +1,12 @@
 import {
     createUserService,
     updateUserService,
-    deleteUserService
-} from "../../services/userService.js"
+    deleteUserService,
+} from "../../services/userService.js";
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{10,}$/;
-const usernameRegex = /^[\p{L}\p{N}@._~:\-’]+$/u
+const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{10,}$/;
+const usernameRegex = /^[\p{L}\p{N}@._~:\-’]+$/u;
 
 export async function createRegisteredUser(req, res) {
     const models = req.app.locals.models;
@@ -16,36 +16,38 @@ export async function createRegisteredUser(req, res) {
 
     if (!email || !emailRegex.test(email))
         return res.status(400).json({
-            error: 'A properly formatted email must be provided for account creation.'
+            error: "A properly formatted email must be provided for account creation.",
         });
     if (!password || !passwordRegex.test(password))
         return res.status(400).json({
-            error: 'A properly formatted password must be provided for account creation.'
+            error: "A properly formatted password must be provided for account creation.",
         });
     if (!username || !usernameRegex.test(username))
         return res.status(400).json({
-            error: 'A properly formatted username must be provided for account creation.'
+            error: "A properly formatted username must be provided for account creation.",
         });
 
     try {
-        const user = await createUserService({
-            email,
-            password,
-            username,
-            role
-        }, models)
+        const user = await createUserService(
+            {
+                email,
+                password,
+                username,
+                role,
+            },
+            models
+        );
 
         return res.status(201).json({ user });
     } catch (error) {
-        return res.status(500).json({ error: error.message })
+        return res.status(500).json({ error: error.message });
     }
 }
 
 export async function updateRegisteredUser(req, res) {
     const models = req.app.locals.models;
     const id = req.params.id;
-    if (!id || !models)
-        return res.status(404).json({ error: 'Not found' });
+    if (!id || !models) return res.status(404).json({ error: "Not found" });
 
     const { email, password, username } = req.body;
 
@@ -54,8 +56,8 @@ export async function updateRegisteredUser(req, res) {
     if (email != undefined) {
         if (!emailRegex.test(email)) {
             return res.status(400).json({
-                error: "Properly formatted email address is needed for profile update"
-            })
+                error: "Properly formatted email address is needed for profile update",
+            });
         }
         update.email = email;
     }
@@ -63,8 +65,8 @@ export async function updateRegisteredUser(req, res) {
     if (username != undefined) {
         if (!usernameRegex.test(username)) {
             return res.status(400).json({
-                error: "Properly formatted username is needed for profile update"
-            })
+                error: "Properly formatted username is needed for profile update",
+            });
         }
         update.username = username;
     }
@@ -72,8 +74,8 @@ export async function updateRegisteredUser(req, res) {
     if (password != undefined) {
         if (!passwordRegex.test(password)) {
             return res.status(400).json({
-                error: "Properly formatted password is needed for profile update"
-            })
+                error: "Properly formatted password is needed for profile update",
+            });
         }
         update.password = password;
     }
@@ -92,8 +94,7 @@ export async function updateRegisteredUser(req, res) {
 export async function deleteRegisteredUser(req, res) {
     const models = req.app.locals.models;
     const id = req.params.id;
-    if (!id || !models)
-        return res.status(400).json({ error: "Not found" });
+    if (!id || !models) return res.status(400).json({ error: "Not found" });
 
     try {
         const user = await deleteUserService(id, models);
