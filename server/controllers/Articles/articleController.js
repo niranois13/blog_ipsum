@@ -5,6 +5,7 @@ import {
     deleteArticleService,
     createArticleService,
 } from "../../services/articleService.js";
+import { myError } from "../../utils/errors.js";
 
 // function checkCloudinaryObject(responseCloudinary) {
 //     if (typeof responseCloudinary !== "object")
@@ -91,7 +92,8 @@ export async function createArticle(req, res) {
 
         return res.status(201).json({ article });
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        const status = error instanceof myError ? error.statusCode : 500;
+        return res.status(status).json({ error: error.message });
     }
 }
 
@@ -104,7 +106,8 @@ export async function getAllArticles(req, res) {
 
         return res.status(200).json(articles);
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        const status = error instanceof myError ? error.statusCode : 500;
+        return res.status(status).json({ error: error.message });
     }
 }
 
@@ -118,7 +121,8 @@ export async function getArticleById(req, res) {
 
         return res.status(200).json(article);
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        const status = error instanceof myError ? error.statusCode : 500;
+        return res.status(status).json({ error: error.message });
     }
 }
 
@@ -132,7 +136,8 @@ export async function deleteArticle(req, res) {
 
         return res.status(200).json(article);
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        const status = error instanceof myError ? error.statusCode : 500;
+        return res.status(status).json({ error: error.message });
     }
 }
 
@@ -150,6 +155,7 @@ export async function updateArticle(req, res) {
 
         return res.status(200).json({ article });
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        const status = error instanceof myError ? error.statusCode : 500;
+        return res.status(status).json({ error: error.message });
     }
 }

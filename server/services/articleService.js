@@ -1,3 +1,4 @@
+import { myError } from "../utils/errors.js";
 import { buildCommentTree } from "./utils/buildCommentTree.js";
 
 export async function createArticleService(data, models) {
@@ -16,7 +17,8 @@ export async function updateArticleService(articleId, data, models) {
     const { Article } = models;
 
     const article = await Article.findByPk(articleId);
-    if (!article) throw new Error("Article not found");
+    if (!article)
+        throw new myError("Article not found", 404);
 
     await article.update(data);
 
@@ -37,7 +39,7 @@ export async function getArticleByIdService(articleId, models) {
     const { Article, Comment } = models;
 
     const article = await Article.findByPk(articleId);
-    if (!article) throw new Error("Article not found");
+    if (!article) throw new myError("Article not found", 404);
 
     const comments = await Comment.findAll({
         where: { id: articleId },
@@ -56,7 +58,8 @@ export async function deleteArticleService(articleId, models) {
     const { Article } = models;
 
     const article = await Article.findByPk(articleId);
-    if (!article) throw new Error("Article not found");
+    if (!article)
+        throw new myError("Article not found", 404);
 
     await article.destroy();
 

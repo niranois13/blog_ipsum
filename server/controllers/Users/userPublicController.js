@@ -3,6 +3,7 @@ import {
     updateUserService,
     deleteUserService,
 } from "../../services/userService.js";
+import { myError } from "../../utils/errors.js";
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{10,}$/;
@@ -10,6 +11,10 @@ const usernameRegex = /^[\p{L}\p{N}@._~:\-’]+$/u;
 
 export async function createRegisteredUser(req, res) {
     const models = req.app.locals.models;
+    if (!models) {
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+
     const role = "REGISTERED";
 
     const { email, password, username } = req.body;
@@ -40,12 +45,17 @@ export async function createRegisteredUser(req, res) {
 
         return res.status(201).json({ user });
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        const status = error instanceof myError ? error.statusCode : 500;
+        return res.status(status).json({ error: error.message });
     }
 }
 
 export async function updateRegisteredUser(req, res) {
     const models = req.app.locals.models;
+    if (!models) {
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+
     const id = req.params.id;
     if (!id || !models) return res.status(404).json({ error: "Not found" });
 
@@ -87,12 +97,17 @@ export async function updateRegisteredUser(req, res) {
 
         return res.status(200).json({ user });
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        const status = error instanceof myError ? error.statusCode : 500;
+        return res.status(status).json({ error: error.message });
     }
 }
 
 export async function deleteRegisteredUser(req, res) {
     const models = req.app.locals.models;
+    if (!models) {
+        return res.status(500).json({ error: "Internal Server Error" });
+    }
+
     const id = req.params.id;
     if (!id || !models) return res.status(400).json({ error: "Not found" });
 
@@ -101,6 +116,7 @@ export async function deleteRegisteredUser(req, res) {
 
         return res.status(201).json({ user });
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        const status = error instanceof myError ? error.statusCode : 500;
+        return res.status(status).json({ error: error.message });
     }
 }

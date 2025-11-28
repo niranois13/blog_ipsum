@@ -3,6 +3,7 @@ import {
     getAllUsersService,
     getUserByIdService,
 } from "../../services/userService.js";
+import { myError } from "../../utils/errors.js";
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const usernameRegex = /^[\p{L}\p{N}@._~:\-’]+$/u;
@@ -56,7 +57,8 @@ export async function createAdmin(req, res) {
 
         return res.status(201).json({ user });
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        const status = error instanceof myError ? error.statusCode : 500;
+        return res.status(status).json({ error: error.message });
     }
 }
 
@@ -68,7 +70,8 @@ export async function getAllUsers(req, res) {
 
         return res.status(201).json(users);
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        const status = error instanceof myError ? error.statusCode : 500;
+        return res.status(status).json({ error: error.message });
     }
 }
 
@@ -81,6 +84,7 @@ export async function getUserById(req, res) {
 
         return res.status(201).json({ user });
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        const status = error instanceof myError ? error.statusCode : 500;
+        return res.status(status).json({ error: error.message });
     }
 }

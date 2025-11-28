@@ -5,6 +5,7 @@ import {
     deleteCommentByIdService,
     updateCommentByIdService,
 } from "../../services/commentService.js";
+import { myError } from "../../utils/errors.js";
 
 const uuid4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -34,7 +35,8 @@ export async function createComment(req, res) {
 
         return res.status(201).json({ comment });
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        const status = error instanceof myError ? error.statusCode : 500;
+        return res.status(status).json({ error: error.message });
     }
 }
 
@@ -47,7 +49,8 @@ export async function getAllComments(req, res) {
 
         return res.status(201).json(comments);
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        const status = error instanceof myError ? error.statusCode : 500;
+        return res.status(status).json({ error: error.message });
     }
 }
 
@@ -63,7 +66,8 @@ export async function getCommentById(req, res) {
 
         return comment;
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        const status = error instanceof myError ? error.statusCode : 500;
+        return res.status(status).json({ error: error.message });
     }
 }
 
@@ -79,7 +83,8 @@ export async function deleteCommentById(req, res) {
 
         return comment;
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        const status = error instanceof myError ? error.statusCode : 500;
+        return res.status(status).json({ error: error.message });
     }
 }
 
@@ -113,6 +118,7 @@ export async function updateCommentById(req, res) {
 
         return comment;
     } catch (error) {
-        return res.status(500).json({ error: error.message });
+        const status = error instanceof myError ? error.statusCode : 500;
+        return res.status(status).json({ error: error.message });
     }
 }
