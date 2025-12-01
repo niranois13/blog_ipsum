@@ -7,18 +7,6 @@ import {
 } from "../../services/articleService.js";
 import { myError } from "../../utils/errors.js";
 
-// function checkCloudinaryObject(responseCloudinary) {
-//     if (typeof responseCloudinary !== "object")
-//         return false;
-//     if (responseCloudinary.resource_type !== "image")
-//         return false;
-//     if (!["jpg", "jpeg", "png", "webp", "avif"].includes(responseCloudinary.format))
-//         return false;
-//     if (!responseCloudinary.secure_url.startsWith('https://res.cloudinary.com/'))
-//         return false;
-//     return true;
-// }
-
 function checkQuillObject(content) {
     if (typeof content !== "object") return false;
     if (!Array.isArray(content.ops)) return false;
@@ -48,7 +36,7 @@ function formatInvalidSummary(summary) {
 function validateArticle(input, isUpdate) {
     const { title, summary, content, cover, status } = input;
 
-    if (!status || !content || !cover) {
+    if (!status || !content) {
         return { valid: false, error: "Missing Parameters" };
     }
 
@@ -62,8 +50,22 @@ function validateArticle(input, isUpdate) {
 
     if (!checkQuillObject(content)) return { valid: false, error: "Invalid Quill content" };
 
-    if (typeof cover !== "string" || !cover.startsWith("https://res.cloudinary.com/"))
-        return { valid: false, error: "Invalid Cloudinary content" };
+    if (status === "PUBLISHED") {
+        if (
+            !cover || typeof cover !== "string" || !cover.startsWith("https://res.cloudinary.com/")
+        ) {
+            return {
+                valid: false,
+                error: "Cover is required and must be a valid Cloudinary URL for published articles"
+            };
+        }
+    } else {
+        if (cover) {
+            if (typeof cover !== "string" || !cover.startsWith("https://res.cloudinary.com/")) {
+                return { valid: false, error: "Cover must be a valid Cloudinary URL if provided" };
+            }
+        }
+    }
 
     const safeTitle = formatInvalidTitle(title);
     const safeSummary = formatInvalidSummary(summary);
@@ -74,7 +76,7 @@ function validateArticle(input, isUpdate) {
             title: safeTitle,
             summary: safeSummary,
             content,
-            cover,
+            cover: cover || null,
             status,
         },
     };

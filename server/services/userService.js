@@ -1,6 +1,4 @@
-import {
-    myError
-} from "../utils/errors.js"
+import { myError } from "../utils/errors.js";
 
 import bcrypt from "bcryptjs";
 
@@ -23,11 +21,9 @@ export async function updateUserService(data, userId, models) {
     const { User } = models;
 
     const user = await User.findByPk(userId);
-    if (!user)
-        throw new myError("Unable to retrieve specified User", 404);
+    if (!user) throw new myError("Unable to retrieve specified User", 404);
 
-    if (!data.password)
-        throw new myError("A password is needed to update this user", 400);
+    if (!data.password) throw new myError("A password is needed to update this user", 400);
 
     data.password = await bcrypt.hash(data.password, 10);
 
@@ -40,8 +36,7 @@ export async function deleteUserService(userId, models) {
     const { User } = models;
 
     const user = await User.findByPk(userId);
-    if (!user)
-        throw new myError("Unable to retrieve specified User", 404);
+    if (!user) throw new myError("Unable to retrieve specified User", 404);
 
     await user.destroy();
 
@@ -62,8 +57,7 @@ export async function getUserByIdService(userId, models) {
     const user = await User.findOne({
         where: { id: userId },
     });
-    if (!user)
-        throw new myError("Unable to retrieve specified User", 404);
+    if (!user) throw new myError("Unable to retrieve specified User", 404);
 
     return user;
 }

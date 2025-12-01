@@ -1,15 +1,21 @@
+import { Sequelize } from "sequelize";
 import buildCommentTree from "../utils/buildCommentTree.js";
 import { myError } from "../utils/errors.js";
 
 export async function createCommentService(data, models) {
-    const { Comment } = models;
+    const { Comment, CommentStats } = models;
 
     const comment = await Comment.create({
         text: data.text,
         replyToId: data.replyToId,
     });
+    const commentStats = await CommentStats.upsert({
+        userId: data.userId,
+        totalComments: Sequelize.literal("totalComments + 1"),
+        lastCommentAt: new Date(),
+    });
 
-    return comment;
+    return [comment, commentStats];
 }
 
 export async function getAllCommentsService(models) {
@@ -18,8 +24,7 @@ export async function getAllCommentsService(models) {
     const comments = await Comment.findAll({
         order: [["createdAt", "ASC"]],
     });
-    if (!comments)
-        throw new myError("No comment found", 404);
+    if (!comments) throw new myError("No comment found", 404);
 
     const commentTree = buildCommentTree(comments);
 
@@ -30,8 +35,7 @@ export async function getCommentByIdService(commentId, models) {
     const { Comment } = models;
 
     const comment = await Comment.findByPk(commentId);
-    if (!comment)
-        throw new myError("No comment found", 404);
+    if (!comment) throw new myError("No comment found", 404);
 
     return comment;
 }
@@ -40,8 +44,7 @@ export async function deleteCommentByIdService(commentId, models) {
     const { Comment } = models;
 
     const comment = await Comment.findByPk(commentId);
-    if (!comment)
-        throw new myError("No comment found", 404);
+    if (!comment) throw new myError("No comment found", 404);
 
     comment.destroy();
 
@@ -52,8 +55,7 @@ export async function updateCommentByIdService(commentId, data, models) {
     const { Comment } = models;
 
     const comment = await Comment.findByPk(commentId);
-    if (!comment)
-        throw new myError("Comment not found", 404);
+    if (!comment) throw new myError("Comment not found", 404);
 
     await comment.update(data);
 
