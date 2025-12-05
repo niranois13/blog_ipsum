@@ -2,8 +2,8 @@ import {
     createUserService,
     updateUserService,
     deleteUserService,
-} from "../../services/userService.js";
-import { myError } from "../../utils/errors.js";
+} from "../services/userService.js";
+import { myError } from "../utils/errors.js";
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{10,}$/;

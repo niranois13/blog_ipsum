@@ -4,8 +4,8 @@ import {
     getArticleByIdService,
     deleteArticleService,
     createArticleService,
-} from "../../services/articleService.js";
-import { myError } from "../../utils/errors.js";
+} from "../services/articleService.js";
+import { myError } from "../utils/errors.js";
 
 function checkQuillObject(content) {
     if (typeof content !== "object") return false;

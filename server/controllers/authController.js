@@ -1,6 +1,6 @@
-import { myError } from "../../utils/errors.js";
-import { loginUserService } from "../../services/authService.js";
-import { generateCookie } from "../../utils/jwtHandler.js";
+import { myError } from "../utils/errors.js";
+import { loginUserService } from "../services/authService.js";
+import { generateCookie } from "../utils/jwtHandler.js";
 
 export async function loginUser(req, res) {
     const models = req.app.locals.models;

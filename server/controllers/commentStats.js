@@ -1,5 +1,5 @@
-import { getSusActivityService } from "../../services/commentStatsService.js";
-import { myError } from "../../utils/errors.js";
+import { getSusActivityService } from "../services/commentStatsService.js";
+import { myError } from "../utils/errors.js";
 
 export async function getSusActivity(req, res) {
     const models = req.app.locals.models;
