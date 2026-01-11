@@ -1,11 +1,11 @@
 import jwt from "jsonwebtoken";
-import { myError } from "./errors";
+import { myError } from "./errors.js";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_EXP = process.env.JWT_EXP;
 
 export function generateToken(payload) {
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXP });
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: parseInt(JWT_EXP) });
     return token;
 }
 
@@ -24,7 +24,7 @@ export function generateCookie(res, token) {
         httpOnly: true,
         secure: false, // true in production
         sameSite: "strict",
-        maxAge: JWT_EXP * 1000,
+        maxAge: parseInt(JWT_EXP) * 1000,
         path: "/",
     });
 }

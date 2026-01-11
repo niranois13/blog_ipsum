@@ -8,6 +8,7 @@ import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
     globalIgnores(["dist/**", "node_modules/**", "build/**", "coverage/**"]),
+    pluginReact.configs.flat.recommended,
     {
         files: ["**/*.{js,mjs,cjs,jsx}"],
         plugins: {
@@ -40,6 +41,7 @@ export default defineConfig([
             "react/react-in-jsx-scope": "off",
             "react-hooks/rules-of-hooks": "error",
             "react-hooks/exhaustive-deps": "warn",
+            "react/prop-types": "off",
             "prettier/prettier": [
                 "error",
                 {
@@ -52,5 +54,4 @@ export default defineConfig([
             ],
         },
     },
-    pluginReact.configs.flat.recommended,
 ]);

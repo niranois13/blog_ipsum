@@ -1,10 +1,12 @@
 import {
     updateArticleService,
     getAllArticlesService,
+    getHomepageArticlesService,
     getArticleByIdService,
     deleteArticleService,
     createArticleService,
 } from "../services/articleService.js";
+import serializeArticle from "../utils/serializeArticle.js";
 import { myError } from "../utils/errors.js";
 
 function checkQuillObject(content) {
@@ -34,7 +36,7 @@ function formatInvalidSummary(summary) {
 }
 
 function validateArticle(input, isUpdate) {
-    const { title, summary, content, cover, status } = input;
+    const { title, summary, content, coverID, coverAlt, status } = input;
 
     if (!status || !content) {
         return { valid: false, error: "Missing Parameters" };
@@ -51,18 +53,25 @@ function validateArticle(input, isUpdate) {
     if (!checkQuillObject(content)) return { valid: false, error: "Invalid Quill content" };
 
     if (status === "PUBLISHED") {
-        if (
-            !cover || typeof cover !== "string" || !cover.startsWith("https://res.cloudinary.com/")
-        ) {
+        if (!coverID || typeof coverID !== "string" || coverID.trim().length === 0) {
             return {
                 valid: false,
-                error: "Cover is required and must be a valid Cloudinary URL for published articles"
+                error: "Cover is required and must be a valid Cloudinary URL for published articles",
+            };
+        }
+        if (!coverAlt || typeof coverAlt !== "string" || coverAlt.trim().length === 0) {
+            return {
+                valid: false,
+                error: "A cover alt field is mandatory for accessibility purposes.",
             };
         }
     } else {
-        if (cover) {
-            if (typeof cover !== "string" || !cover.startsWith("https://res.cloudinary.com/")) {
+        if (coverID) {
+            if (typeof coverID !== "string" || coverID.trim().length === 0) {
                 return { valid: false, error: "Cover must be a valid Cloudinary URL if provided" };
+            }
+            if (!coverAlt || typeof coverAlt !== "string" || coverAlt.trim().length === 0) {
+                return { valid: false, error: "An alt field is required for cover images" };
             }
         }
     }
@@ -76,7 +85,8 @@ function validateArticle(input, isUpdate) {
             title: safeTitle,
             summary: safeSummary,
             content,
-            cover: cover || null,
+            coverID: coverID || null,
+            coverAlt: coverAlt || null,
             status,
         },
     };
@@ -86,13 +96,60 @@ export async function createArticle(req, res) {
     const models = req.app.locals.models;
     if (!models) return res.status(500).json({ error: "No valid model" });
 
+    if (typeof req.body.content === "string") {
+        try {
+            req.body.content = JSON.parse(req.body.content);
+        } catch {
+            return res.status(400).json({ error: "Invalid content format" });
+        }
+    }
+
     const validation = validateArticle(req.body, false);
     if (!validation.valid) return res.status(400).json({ error: validation.error });
+
+    validation.data.userId = req.user.id;
 
     try {
         const article = await createArticleService(validation.data, models);
 
         return res.status(201).json({ article });
+    } catch (error) {
+        const status = error instanceof myError ? error.statusCode : 500;
+        return res.status(status).json({ error: error.message });
+    }
+}
+
+export async function getHomepageArticles(req, res) {
+    const models = req.app.locals.models;
+    if (!models) return res.status(404).json({ error: "Not found" });
+
+    try {
+        const articles = await getHomepageArticlesService(models);
+        const articlesData = articles?.Articles;
+        if (!articlesData) return res.status(404).json({ error: "No article found" });
+
+        const { latestArticle, otherLatestArticles, allOtherArticles } = articlesData;
+        if (!latestArticle || latestArticle.length === 0)
+            return res.status(404).json({ error: "No article found" });
+        const serializedLatestArticle = latestArticle ? serializeArticle(latestArticle) : null;
+
+        if (!otherLatestArticles || otherLatestArticles.length === 0)
+            return res.status(404).json({ error: "Not found" });
+        const serializedOtherLatestArticles = otherLatestArticles
+            ? otherLatestArticles.map(serializeArticle)
+            : null;
+
+        if (!allOtherArticles || allOtherArticles.length === 0)
+            return res.status(404).json({ error: "Not found" });
+        const serializedAllOtherArticles = allOtherArticles
+            ? allOtherArticles.map(serializeArticle)
+            : null;
+
+        return res.status(200).json({
+            latestArticle: serializedLatestArticle,
+            otherLatestArticles: serializedOtherLatestArticles,
+            allOtherArticles: serializedAllOtherArticles,
+        });
     } catch (error) {
         const status = error instanceof myError ? error.statusCode : 500;
         return res.status(status).json({ error: error.message });
@@ -106,7 +163,9 @@ export async function getAllArticles(req, res) {
     try {
         const articles = await getAllArticlesService(models);
 
-        return res.status(200).json(articles);
+        const serializedArticles = articles.map(serializeArticle);
+
+        return res.status(200).json(serializedArticles);
     } catch (error) {
         const status = error instanceof myError ? error.statusCode : 500;
         return res.status(status).json({ error: error.message });
@@ -119,9 +178,11 @@ export async function getArticleById(req, res) {
     if (!models || !id) return res.status(404).json({ error: "Not found" });
 
     try {
-        const article = await getArticleByIdService(id, models);
+        const { article, commentTree } = await getArticleByIdService(id, models);
 
-        return res.status(200).json(article);
+        const serializedArticle = { article: serializeArticle(article), commentTree };
+
+        return res.status(200).json(serializedArticle);
     } catch (error) {
         const status = error instanceof myError ? error.statusCode : 500;
         return res.status(status).json({ error: error.message });
@@ -148,6 +209,19 @@ export async function updateArticle(req, res) {
     const id = req.params.id;
     if (!models) return res.status(500).json({ error: "No valid model" });
     if (!id) return res.status(404).json({ error: "Not Found" });
+
+    if (typeof req.body.content === "string") {
+        try {
+            req.body.content = JSON.parse(req.body.content);
+        } catch {
+            return res.status(400).json({ error: "Invalid content format" });
+        }
+    }
+
+    const { article } = await getArticleByIdService(id, models);
+    if (!article) return res.status(404).json({ error: "Not Found" });
+
+    if (!req.body.coverID) req.body.coverID = article.coverID;
 
     const validation = validateArticle(req.body, true);
     if (!validation.valid) return res.status(400).json({ error: validation.error });

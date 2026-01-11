@@ -1,4 +1,4 @@
-import { verifyToken } from "../utils/jwtHandler";
+import { verifyToken } from "../utils/jwtHandler.js";
 
 export function authMiddleware(req, res, next) {
     const token = req.cookies.token;

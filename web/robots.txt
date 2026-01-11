@@ -1,0 +1,9 @@
+User-agent: Googlebot
+Allow: /articles/
+
+User-agent: Bingbot
+Allow: /articles/
+
+User-agent: *
+Disallow: /articles/
+Disallow: /api/

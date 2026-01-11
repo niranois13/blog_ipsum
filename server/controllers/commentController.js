@@ -14,6 +14,8 @@ export async function createComment(req, res) {
     if (!models) return res.status(500).json("No model found");
 
     const { replyToId, text } = req.body;
+    const articleId = req.params.articleId;
+    const userId = req.user.id;
 
     if (!text || typeof text !== "string") return res.status(400).json("Invalid comment format");
 
@@ -21,14 +23,16 @@ export async function createComment(req, res) {
     if (textCheck.length < 1 || textCheck.length > 1000)
         return res.status(400).json("A comment must have between 1 and 1000 characters.");
 
-    if (replyToId !== null && (typeof replyToId !== "string" || uuid4Regex.test(replyToId)))
+    if (replyToId !== null && (typeof replyToId !== "string" || !uuid4Regex.test(replyToId)))
         return res.status(400).json("Invalid comment's parent ID");
 
     try {
         const comment = await createCommentService(
             {
                 replyToId,
+                userId,
                 textCheck,
+                articleId,
             },
             models
         );

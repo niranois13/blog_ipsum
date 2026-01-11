@@ -1,17 +1,26 @@
 export default function buildCommentTree(comments) {
+    if (!comments || !Array.isArray(comments)) return [];
+
+    const nodes = comments.map((c) => c.dataValues || c);
+
     const map = new Map();
     const roots = [];
 
-    comments.array.forEach((comment) => map.set(comment.id, comment.toJson()));
+    nodes.forEach((node) => {
+        node.replies = [];
+        map.set(node.id, node);
+    });
 
-    comments.forEach((comment) => {
-        const commentAsJson = map.get(comment.id);
-        if (comment.replyToId === null) {
-            roots.push(commentAsJson);
+    nodes.forEach((node) => {
+        if (node.replyToId === null) {
+            roots.push(node);
         } else {
-            const parent = map.get(comment.replyToId);
-            if (!parent.replies) parent.replies = [];
-            parent.replies.push(commentAsJson);
+            const parent = map.get(node.replyToId);
+            if (parent) {
+                parent.replies.push(node);
+            } else {
+                roots.push(node);
+            }
         }
     });
 

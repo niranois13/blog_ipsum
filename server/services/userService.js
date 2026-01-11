@@ -1,8 +1,7 @@
 import { myError } from "../utils/errors.js";
-import crypto from 'crypto';
+import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { generateRandomUsername } from "../utils/visitorHandler.js";
-import { createRegisteredUser } from "../controllers/userPublicController.js";
 
 export async function createUserService(data, models) {
     const { User } = models;
@@ -67,13 +66,15 @@ export async function getUserByIdService(userId, models) {
 export async function handleVisitorEntry(data, models) {
     const { User } = models;
 
-    const ipHash = crypto.createHash("sha256").update(data.ip + process.env.IP_SALT).digest("hex");
+    const ipHash = crypto
+        .createHash("sha256")
+        .update(data.ip + process.env.IP_SALT)
+        .digest("hex");
 
     let user = await User.findOne({
-        where: { ipHash: ipHash }
+        where: { ipHash: ipHash },
     });
-    if (user)
-        return user;
+    if (user) return user;
 
     let randomUsername = null;
 
@@ -81,8 +82,8 @@ export async function handleVisitorEntry(data, models) {
         const candidate = generateRandomUsername();
 
         const exists = await User.findOne({
-            where: { username: candidate }
-        })
+            where: { username: candidate },
+        });
 
         if (!exists) {
             randomUsername = candidate;
@@ -90,15 +91,14 @@ export async function handleVisitorEntry(data, models) {
         }
     }
 
-    if (!randomUsername)
-        throw new myError("Unable to generate unique username", 500);
+    if (!randomUsername) throw new myError("Unable to generate unique username", 500);
 
     user = await User.create({
         email: null,
         password: null,
         role: "VISITOR",
         username: randomUsername,
-        ipHash: ipHash
+        ipHash: ipHash,
     });
 
     return user;
@@ -118,7 +118,7 @@ export async function promoteVisitorToRegistered(data, userId, models) {
         username: data.username,
         password: hashedPassword,
         role: "REGISTERED",
-        ipHash: null
+        ipHash: null,
     });
 
     return user;

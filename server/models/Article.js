@@ -11,10 +11,13 @@ export default function (sequelize) {
                 type: DataTypes.STRING,
                 allowNull: false,
             },
-            cover: {
+            coverID: {
                 type: DataTypes.STRING,
-                allowNull: false,
-                validate: { isUrl: true },
+                allowNull: true,
+            },
+            coverAlt: {
+                type: DataTypes.STRING,
+                allowNull: true,
             },
             summary: {
                 type: DataTypes.TEXT,

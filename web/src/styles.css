@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Gentium+Book+Plus:ital,wght@0,400;0,700;1,400;1,700&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+@import 'tailwindcss';
+
+@theme {
+    --color-primary: oklch(0.4955 0.1305 293.71);
+    --color-light: oklch(0.9183 0.0477 302.83);
+    --color-dark: oklch(0.4859 0.0358 299.61);
+    --color-bg: oklch(0.9838 0.0128 321.89);
+    --color-accent: oklch(0.8367 0.0666 359.43);
+    --color-text: oklch(0.4386 0 0);
+    --font-sans: "Lato", sans-serif;
+    --font-serif: "Gentium Book Plus", serif;
+}
+
+body {
+    overflow-x: hidden;
+}

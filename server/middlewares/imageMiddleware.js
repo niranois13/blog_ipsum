@@ -1,17 +1,31 @@
-import cloudinary from "../utils/cloudinary.js";
+import cloudinary from "../utils/cloudinary.cjs";
 import multer from "multer";
 
 const storage = multer.memoryStorage();
-const upload = multer({ storage }).single("cover");
+const upload = multer({
+    storage,
+    limits: {
+        fileSize: 10 * 1024 * 1024,
+    },
+}).single("cover");
 
 export async function uploadToCloudinary(req, res, next) {
-    upload(req, res, async function (error) {
-        if (error) return res.status(400).json({ error: error.message });
-        if (!req.file) return res.status(400).json({ error: "No cover file provided" });
+    upload(req, res, async (error) => {
+        if (error) {
+            if (error.code === "LIMIT_FILE_SIZE") {
+                return res.status(413).json({ error: "File too large. Max 10 MB allowed." });
+            }
+            return res.status(400).json({ error: error.message });
+        }
 
-        const allowTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/avif"];
-        if (!allowTypes.includes(req.file.mimetype))
+        // Pas de fichier, passer au prochain middleware
+        if (!req.file) return next();
+
+        // Vérifier le type MIME
+        const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/avif"];
+        if (!allowedTypes.includes(req.file.mimetype)) {
             return res.status(400).json({ error: "Invalid image type" });
+        }
 
         try {
             const result = await new Promise((resolve, reject) => {
@@ -24,12 +38,11 @@ export async function uploadToCloudinary(req, res, next) {
                 );
                 stream.end(req.file.buffer);
             });
-
-            req.body.cover = result.secure_url;
+            req.body.coverID = result.public_id;
 
             next();
         } catch (error) {
-            console.error(error);
+            console.error("Cloudinary upload error:", error);
             return res.status(500).json({ error: "Cloudinary upload failed" });
         }
     });

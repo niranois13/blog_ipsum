@@ -1,21 +1,15 @@
-import {
-    createArticle,
-    updateArticle,
-    deleteArticle,
-} from "../controllers/Articles/articleController.js";
-import { createAdmin, getAllUsers, getUserById } from "../controllers/Users/userAdminController.js";
-import {
-    deleteRegisteredUser,
-    updateRegisteredUser,
-} from "../controllers/Users/userPublicController.js";
+import { createArticle, updateArticle, deleteArticle } from "../controllers/articleController.js";
+import { createAdmin, getAllUsers, getUserById } from "../controllers/userAdminController.js";
+import { deleteRegisteredUser, updateRegisteredUser } from "../controllers/userPublicController.js";
 import {
     getAllComments,
     getCommentById,
     deleteCommentById,
     updateCommentById,
-} from "../controllers/Comments/commentController.js";
-import { getSusActivity } from "../controllers/CommentStats/commentStats.js";
+} from "../controllers/commentController.js";
+import { getSusActivity } from "../controllers/commentStats.js";
 import { authMiddleware, requireAdmin } from "../middlewares/authMiddleware.js";
+import { uploadToCloudinary } from "../middlewares/imageMiddleware.js";
 
 export default function exportAdminRoutes(app) {
     /* Users */
@@ -36,12 +30,26 @@ export default function exportAdminRoutes(app) {
     });
 
     /* Articles */
-    app.post("/api/admin/articles", authMiddleware, requireAdmin, (req, res) => {
-        createArticle(req, res);
-    });
-    app.put("/api/admin/articles/:id", authMiddleware, requireAdmin, (req, res) => {
-        updateArticle(req, res);
-    });
+    app.post(
+        "/api/admin/articles",
+        authMiddleware,
+        requireAdmin,
+        uploadToCloudinary,
+        (req, res) => {
+            createArticle(req, res);
+        }
+    );
+
+    app.put(
+        "/api/admin/articles/:id",
+        authMiddleware,
+        requireAdmin,
+        uploadToCloudinary,
+        (req, res) => {
+            updateArticle(req, res);
+        }
+    );
+
     app.delete("/api/admin/articles/:id", authMiddleware, requireAdmin, (req, res) => {
         deleteArticle(req, res);
     });

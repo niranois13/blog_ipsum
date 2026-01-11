@@ -6,9 +6,12 @@ export async function createCommentService(data, models) {
     const { Comment, CommentStats } = models;
 
     const comment = await Comment.create({
-        text: data.text,
+        text: data.textCheck,
+        userId: data.userId,
         replyToId: data.replyToId,
+        articleId: data.articleId,
     });
+
     const commentStats = await CommentStats.upsert({
         userId: data.userId,
         totalComments: Sequelize.literal("totalComments + 1"),

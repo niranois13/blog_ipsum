@@ -6,14 +6,16 @@ export async function createArticleService(data, models) {
 
     return await Article.create({
         title: data.title,
-        cover: data.cover,
+        coverID: data.coverID,
+        coverAlt: data.coverAlt,
         summary: data.summary,
         content: data.content,
         status: data.status,
+        userId: data.userId,
     });
 }
 
-export async function updateArticleService(articleId, data, models) {
+export async function updateArticleService(data, articleId, models) {
     const { Article } = models;
 
     const article = await Article.findByPk(articleId);
@@ -28,24 +30,58 @@ export async function getAllArticlesService(models) {
     const { Article } = models;
 
     const articles = await Article.findAll({
-        order: [["createdAt", "ASC"]],
+        order: [["updatedAt", "DESC"]],
     });
 
     return articles;
 }
 
+export async function getHomepageArticlesService(models) {
+    const { Article } = models;
+
+    const allPublishedArticles = await Article.findAll({
+        where: { status: "PUBLISHED" },
+        order: [["updatedAt", "DESC"]],
+        raw: true,
+    });
+
+    if (!allPublishedArticles.length) return { Articles: {} };
+
+    const latestArticle = allPublishedArticles[0];
+    const otherLatestArticles = allPublishedArticles.slice(1, 4);
+    const allOtherArticles = allPublishedArticles.slice(4);
+
+    return {
+        Articles: {
+            latestArticle,
+            otherLatestArticles,
+            allOtherArticles,
+        },
+    };
+}
+
 export async function getArticleByIdService(articleId, models) {
-    const { Article, Comment } = models;
+    const { Article, Comment, User } = models;
 
     const article = await Article.findByPk(articleId);
     if (!article) throw new myError("Article not found", 404);
 
     const comments = await Comment.findAll({
-        where: { id: articleId },
+        where: { articleId },
         order: [["createdAt", "ASC"]],
+        include: [
+            {
+                model: User,
+                as: "author",
+                attributes: ["id", "username", "role"],
+            },
+        ],
     });
 
-    const commentTree = buildCommentTree(comments);
+    let commentTree = [];
+    if (comments.length > 0) {
+        commentTree = buildCommentTree(comments);
+    }
 
     return {
         article,

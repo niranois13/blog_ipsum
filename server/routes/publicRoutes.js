@@ -1,20 +1,29 @@
-import { getAllArticles, getArticleById } from "../controllers/Articles/articleController.js";
-import { createComment } from "../controllers/Comments/commentController.js";
-import { loginUser, logOut } from "../controllers/Users/authController.js";
+import {
+    getAllArticles,
+    getArticleById,
+    getHomepageArticles,
+} from "../controllers/articleController.js";
+import { createComment } from "../controllers/commentController.js";
+import { loginUser, logOut, getMe } from "../controllers/authController.js";
 import {
     createRegisteredUser,
     deleteRegisteredUser,
     updateRegisteredUser,
-} from "../controllers/Users/userPublicController.js";
+} from "../controllers/userPublicController.js";
 import { authMiddleware, requireSelf } from "../middlewares/authMiddleware.js";
+import { resolveUser } from "../middlewares/visitorIdentityMiddleware.js";
+import { preventCommentSpamDoxx } from "../middlewares/commentMiddleware.js";
 
 export default function exportPublicRoutes(app) {
     /* Authentication */
     app.post("/api/login", (req, res) => {
         loginUser(req, res);
     });
-    app.post("api/logout", (req, res) => {
+    app.post("/api/logout", (req, res) => {
         logOut(req, res);
+    });
+    app.get("/api/auth/me", (req, res) => {
+        getMe(req, res);
     });
 
     /* Users */
@@ -32,12 +41,20 @@ export default function exportPublicRoutes(app) {
     app.get("/api/articles", (req, res) => {
         getAllArticles(req, res);
     });
+    app.get("/api/articles/homepage", (req, res) => {
+        getHomepageArticles(req, res);
+    });
     app.get("/api/articles/:id", (req, res) => {
         getArticleById(req, res);
     });
 
     /* Comments */
-    app.post("/api/articles/:articleId/comments/", (req, res) => {
-        createComment(req, res);
-    });
+    app.post(
+        "/api/articles/:articleId/comments/",
+        resolveUser,
+        preventCommentSpamDoxx,
+        (req, res) => {
+            createComment(req, res);
+        }
+    );
 }

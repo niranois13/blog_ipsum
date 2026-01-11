@@ -3,6 +3,7 @@ import { Sequelize } from "sequelize";
 import setupModels from "../models/index.js";
 import exportPublicRoutes from "../routes/publicRoutes.js";
 import exportAdminRoutes from "../routes/adminRoutes.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 const port = process.env.SERVER_PORT;
@@ -33,7 +34,7 @@ async function synchroModels() {
     try {
         const models = setupModels(sequelize);
 
-        await sequelize.sync({ force: true });
+        await sequelize.sync();
         console.log("Models synchronized successfully.");
 
         app.locals.models = models;
@@ -53,6 +54,7 @@ async function startServer() {
     if (!synchronized) return;
 
     app.use(express.json());
+    app.use(cookieParser());
     exportAdminRoutes(app);
     exportPublicRoutes(app);
 
