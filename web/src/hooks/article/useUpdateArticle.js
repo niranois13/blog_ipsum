@@ -26,7 +26,6 @@ export const useUpdateArticle = (onSuccessCb) => {
             for (const [key, value] of formData.entries()) {
                 debugData[key] = value;
             }
-            console.log("formData leaving frontend:", debugData);
 
             const request = axios.put(`/api/admin/articles/${id}`, formData, {
                 withCredentials: true,

@@ -1,10 +1,12 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { ImageUp, X } from "lucide-react";
-import QuillEditor from "../../../QuillEditor";
 import { useCreateArticle } from "../../../hooks/article/useCreateArticle";
 import { useUpdateArticle } from "../../../hooks/article/useUpdateArticle";
 import { useDeleteArticle } from "../../../hooks/article/useDeleteArticle";
+import { lazy, Suspense } from "react";
+
+const QuillEditor = lazy(() => import("../../../QuillEditor"));
 
 export default function ArticleForm({ mode = "create", initialArticle = null }) {
     const [title, setTitle] = useState("");
@@ -166,7 +168,9 @@ export default function ArticleForm({ mode = "create", initialArticle = null }) 
             />
 
             <div>
-                <QuillEditor value={content} onChange={setContent} />
+                <Suspense fallback={<p>Loading editor...</p>}>
+                    <QuillEditor value={content} onChange={setContent} />
+                </Suspense>
             </div>
 
             <div className="flex flex-col sm:flex-row justify-center gap-5 sm:gap-10">

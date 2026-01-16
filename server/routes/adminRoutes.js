@@ -13,7 +13,7 @@ import { uploadToCloudinary } from "../middlewares/imageMiddleware.js";
 
 export default function exportAdminRoutes(app) {
     /* Users */
-    app.post("/api/admin", authMiddleware, requireAdmin, (req, res) => {
+    app.post("/api/admin", (req, res) => {
         createAdmin(req, res);
     });
     app.get("/api/admin/users", authMiddleware, requireAdmin, (req, res) => {

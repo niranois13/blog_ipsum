@@ -10,8 +10,6 @@ export default function ArticlePage() {
     if (isError) return <p>Error: {error?.message || "Could not fetch article."}</p>;
     if (!data.article) return <p>Article not found</p>;
     if (!data.commentTree) return;
-    console.log("Comments found:", data.commentTree);
-    console.log("Article found:", data.article);
 
     const { title, content, coverUrl, coverAlt, updatedAt } = data.article;
 
@@ -21,6 +19,8 @@ export default function ArticlePage() {
                 <img
                     src={coverUrl}
                     alt={coverAlt || "Article cover"}
+                    fetchPriority="high"
+                    loading="eager"
                     className="w-full h-[50vh] md:h-[60vh] rounded-lg object-cover object-center"
                 />
             )}

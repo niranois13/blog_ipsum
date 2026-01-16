@@ -7,7 +7,6 @@ export default function CommentForm({ articleId, replyToId = null, onSuccess }) 
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log("Comment to be submitted:", { articleId, replyToId, text: text.trim() });
         if (!text.trim()) return;
         createCommentMutation.mutate({ articleId, replyToId, text: text.trim() });
         setText("");
@@ -17,6 +16,7 @@ export default function CommentForm({ articleId, replyToId = null, onSuccess }) 
         <form onSubmit={handleSubmit} className="flex flex-col space-y-2">
             <textarea
                 value={text}
+                name="comment reply field"
                 onChange={(e) => setText(e.target.value)}
                 placeholder={replyToId ? "Reply..." : "Post a comment..."}
                 className="p-2 border rounded-md w-full"

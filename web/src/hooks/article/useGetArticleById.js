@@ -6,7 +6,6 @@ export const useGetArticleById = (id) => {
         queryKey: ["articles", id],
         queryFn: async () => {
             const response = await axios.get(`/api/articles/${id}`);
-            console.log("useGetArticleById response:", response.data);
             return response.data;
         },
         enabled: !!id && id !== "new",

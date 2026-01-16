@@ -30,7 +30,13 @@ export async function uploadToCloudinary(req, res, next) {
         try {
             const result = await new Promise((resolve, reject) => {
                 const stream = cloudinary.uploader.upload_stream(
-                    { folder: "blog_covers" },
+                    {
+                        folder: "blog_covers",
+                        transformation: [
+                            { width: 1200, crop: "limit" },
+                            { fetch_format: "auto", quality: "auto" },
+                        ],
+                    },
                     (error, result) => {
                         if (error) return reject(error);
                         resolve(result);

@@ -1,7 +1,6 @@
 // QuillEditor.jsx
 import React, { useEffect, useRef } from "react";
 import Quill from "quill";
-import "quill/dist/quill.snow.css";
 
 const QuillEditor = ({
     value = { ops: [] },
@@ -15,6 +14,10 @@ const QuillEditor = ({
     useEffect(() => {
         onChangeRef.current = onChange;
     }, [onChange]);
+
+    useEffect(() => {
+        import("quill/dist/quill.snow.css");
+    }, []);
 
     useEffect(() => {
         if (!editorRef.current || quillRef.current) return;

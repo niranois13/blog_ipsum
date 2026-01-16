@@ -8,7 +8,6 @@ export const useCreateComment = (articleId, onSuccessCb) => {
     return useMutation({
         mutationFn: ({ articleId, replyToId, text }) => {
             const request = axios.post(`/api/articles/${articleId}/comments`, { replyToId, text });
-            console.log("Request leaving frontend:", request);
 
             return toast.promise(request, {
                 loading: "Creating comment...",

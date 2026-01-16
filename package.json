@@ -8,9 +8,10 @@
         "lint": "eslint . --ext .js,.jsx",
         "lint:fix": "eslint . --ext .js,.jsx --fix",
         "format": "prettier --write .",
-        "dev": "docker-compose up --build",
-        "stop": "docker-compose down",
-        "build": "docker-compose build"
+        "dev": "docker compose up --build",
+        "up": "docker compose up",
+        "stop": "docker compose down",
+        "build": "docker compose build"
     },
     "keywords": [],
     "author": "",
