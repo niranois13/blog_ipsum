@@ -30,6 +30,16 @@ export async function getAllArticlesService(models) {
     const { Article } = models;
 
     const articles = await Article.findAll({
+        attributes: [
+            "id",
+            "title",
+            "coverID",
+            "coverAlt",
+            "summary",
+            "status",
+            "createdAt",
+            "updatedAt",
+        ],
         order: [["updatedAt", "DESC"]],
     });
 
@@ -41,6 +51,7 @@ export async function getHomepageArticlesService(models) {
 
     const allPublishedArticles = await Article.findAll({
         where: { status: "PUBLISHED" },
+        attributes: ["id", "title", "summary", "coverID", "coverAlt", "updatedAt"],
         order: [["updatedAt", "DESC"]],
         raw: true,
     });

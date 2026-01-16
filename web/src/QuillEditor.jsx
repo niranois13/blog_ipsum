@@ -30,7 +30,7 @@ const QuillEditor = ({
                     [{ header: [1, 2, 3, false] }],
                     ["bold", "italic", "underline"],
                     ["blockquote", "code-block"],
-                    ["link", "image", "video", "formula"],
+                    ["link", "image", "video"],
                     [{ list: "ordered" }, { list: "bullet" }, { list: "check" }],
                     [{ indent: "-1" }, { indent: "+1" }],
                     [{ size: ["small", "large", "huge", false] }],

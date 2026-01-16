@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import AdminButton from "../../ui/AdminButton";
 import { FilePenLine, FileDown, FileX } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
-import formatDate from "../../../../utils/formatDate";
+import formatDate from "../../../utils/formatDate";
 import { useArchiveArticle } from "../../../hooks/article/useArchiveArticle";
 import { useDeleteArticle } from "../../../hooks/article/useDeleteArticle";
 
