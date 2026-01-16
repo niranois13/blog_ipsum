@@ -99,3 +99,14 @@ export async function deleteArticleService(articleId, models) {
 
     return article;
 }
+
+export async function archiveArticleService(articleId, models) {
+    const { Article } = models;
+
+    const article = await Article.findByPk(articleId);
+    if (!article) throw new myError("Article not found", 404);
+
+    await article.update({ status: "ARCHIVED" });
+
+    return article;
+}
