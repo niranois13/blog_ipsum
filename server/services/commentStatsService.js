@@ -21,7 +21,7 @@ export async function getSusActivityService(models) {
         include: [
             {
                 model: User,
-                attributes: ["id", "username", "email"],
+                attributes: ["id", "username"],
             },
         ],
         order: [["totalRejected", "DESC"]],
