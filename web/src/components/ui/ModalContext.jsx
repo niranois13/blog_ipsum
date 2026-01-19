@@ -69,7 +69,7 @@ export function ModalProvider({ children }) {
                 >
                     <div
                         ref={modalRef}
-                        aria-label="authentication modal openned"
+                        aria-label="modal openned"
                         role="dialog"
                         aria-modal="true"
                         className="bg-bg p-6 rounded-xl shadow-xl outline-none"

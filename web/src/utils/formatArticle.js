@@ -21,6 +21,42 @@ export function parseArticleContent(content) {
 
 let quillInstance = null;
 
+function transformDeltaForConsent(delta, consent) {
+    const ops = [];
+
+    for (const op of delta.ops) {
+        if (op.insert?.video) {
+            if (consent) {
+                ops.push(op);
+            } else {
+                ops.push({ insert: "[[VIDEO_PLACEHOLDER]]\n" });
+            }
+            continue;
+        }
+
+        ops.push(op);
+    }
+
+    return { ops };
+}
+
+function replaceVideoPlaceholders(html) {
+    return html.replace(/\[\[VIDEO_PLACEHOLDER\]\]/g, videoPlaceholderHTML());
+}
+
+function videoPlaceholderHTML() {
+    return `
+        <div class="video-placeholder bg-gray-100 border rounded p-4 text-center my-4">
+            <p class="mb-2 text-sm text-gray-700">
+                This video is hosted on YouTube and requires cookie consent.
+            </p>
+            <a href="/privacy" class="underline text-blue-600">
+                Manage privacy settings
+            </a>
+        </div>
+    `;
+}
+
 function getQuillInstance() {
     if (quillInstance) return quillInstance;
 
@@ -37,20 +73,16 @@ function getQuillInstance() {
     return quillInstance;
 }
 
-function normalizeDelta(delta) {
+function normalizeVideoLayout(delta) {
     const ops = [];
 
     for (let i = 0; i < delta.ops.length; i++) {
         const op = delta.ops[i];
+        const nextOp = delta.ops[i + 1];
 
         if (op.insert?.video) {
             ops.push(op);
-            ops.push({ insert: "\n" });
-            continue;
-        }
-
-        if (typeof op.insert === "string" && i > 0 && delta.ops[i - 1]?.insert?.video) {
-            ops.push({ insert: op.insert });
+            if (nextOp?.insert === "string" && nextOp?.insert !== "\n") ops.push({ insert: "\n" });
             continue;
         }
 
@@ -60,26 +92,7 @@ function normalizeDelta(delta) {
     return { ops };
 }
 
-export function quillDeltaToCleanHtml(delta) {
-    if (!delta?.ops) return "";
-
-    const quill = getQuillInstance();
-    const normalized = normalizeDelta(delta);
-    quill.setContents(normalized);
-
-    const rawHtml = quill.container.querySelector(".ql-editor").innerHTML;
-    const cleanHtml = DOMPurify.sanitize(rawHtml, {
-        USE_PROFILES: { html: true },
-        ADD_TAGS: ["iframe"],
-        ADD_ATTR: ["src", "allow", "allowfullscreen", "referrerpolicy", "loading", "sandbox"],
-    });
-
-    const sanitizedVideoHTML = sanitizeVideos(cleanHtml);
-
-    return sanitizedVideoHTML;
-}
-
-function sanitizeVideos(html) {
+function sanitizeYoutubeIframes(html) {
     const container = document.createElement("div");
     container.innerHTML = html;
 
@@ -106,6 +119,7 @@ function sanitizeVideos(html) {
 
             const videoId = url.pathname.split("/embed/")[1].split("?")[0];
             const newUrl = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0`;
+
             iframe.setAttribute("src", newUrl);
             iframe.setAttribute("loading", "lazy");
             iframe.setAttribute(
@@ -123,4 +137,33 @@ function sanitizeVideos(html) {
     }
 
     return container.innerHTML;
+}
+
+export function quillDeltaToCleanHtml(delta, consent) {
+    if (!delta?.ops) return "";
+
+    delta = normalizeVideoLayout(delta);
+
+    const quill = getQuillInstance();
+
+    const safeDelta = transformDeltaForConsent(delta, consent);
+    quill.setContents(safeDelta);
+
+    let html = quill.container.querySelector(".ql-editor").innerHTML;
+
+    html = DOMPurify.sanitize(html, {
+        USE_PROFILES: { html: true },
+        ADD_TAGS: consent ? ["iframe"] : ["div"],
+        ADD_ATTR: consent
+            ? ["src", "allow", "allowfullscreen", "loading", "sandbox"]
+            : ["data-video-placeholder"],
+    });
+
+    if (consent) {
+        html = sanitizeYoutubeIframes(html);
+    } else {
+        html = replaceVideoPlaceholders(html);
+    }
+
+    return html;
 }
