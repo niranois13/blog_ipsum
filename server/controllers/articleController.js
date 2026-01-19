@@ -5,6 +5,7 @@ import {
     getArticleByIdService,
     deleteArticleService,
     createArticleService,
+    archiveArticleService,
 } from "../services/articleService.js";
 import serializeArticle from "../utils/serializeArticle.js";
 import { myError } from "../utils/errors.js";
@@ -228,6 +229,22 @@ export async function updateArticle(req, res) {
 
     try {
         const article = await updateArticleService(validation.data, id, models);
+
+        return res.status(200).json({ article });
+    } catch (error) {
+        const status = error instanceof myError ? error.statusCode : 500;
+        return res.status(status).json({ error: error.message });
+    }
+}
+
+export async function archiveArticle(req, res) {
+    const models = req.app.locals.models;
+    const id = req.params.id;
+    if (!models) return res.status(500).json({ error: "No valid model" });
+    if (!id) return res.status(404).json({ error: "Not Found" });
+
+    try {
+        const article = await archiveArticleService(id, models);
 
         return res.status(200).json({ article });
     } catch (error) {

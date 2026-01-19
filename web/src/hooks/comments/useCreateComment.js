@@ -6,8 +6,13 @@ export const useCreateComment = (articleId, onSuccessCb) => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ articleId, replyToId, text }) => {
-            const request = axios.post(`/api/articles/${articleId}/comments`, { replyToId, text });
+        mutationFn: ({ articleId, replyToId, text, honey, formLoadedAt }) => {
+            const request = axios.post(`/api/articles/${articleId}/comments`, {
+                replyToId,
+                text,
+                honey,
+                formLoadedAt,
+            });
 
             return toast.promise(request, {
                 loading: "Creating comment...",

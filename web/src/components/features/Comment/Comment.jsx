@@ -1,6 +1,6 @@
 import { useState } from "react";
 import CommentForm from "./CommentForm";
-import formatDate from "../../../../utils/formatDate";
+import formatDate from "../../../utils/formatDate";
 
 export default function Comment({ comment }) {
     const [showReply, setShowReply] = useState(false);

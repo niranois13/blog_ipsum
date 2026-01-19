@@ -12,7 +12,11 @@ import {
 } from "../controllers/userPublicController.js";
 import { authMiddleware, requireSelf } from "../middlewares/authMiddleware.js";
 import { resolveUser } from "../middlewares/visitorIdentityMiddleware.js";
-import { preventCommentSpamDoxx } from "../middlewares/commentMiddleware.js";
+import {
+    preventCommentSpamDoxx,
+    preventFastComments,
+    rateLimitComments,
+} from "../middlewares/commentMiddleware.js";
 
 export default function exportPublicRoutes(app) {
     /* Authentication */
@@ -53,6 +57,8 @@ export default function exportPublicRoutes(app) {
         "/api/articles/:articleId/comments/",
         resolveUser,
         preventCommentSpamDoxx,
+        preventFastComments,
+        rateLimitComments,
         (req, res) => {
             createComment(req, res);
         }

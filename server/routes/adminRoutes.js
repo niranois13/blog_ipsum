@@ -1,4 +1,9 @@
-import { createArticle, updateArticle, deleteArticle } from "../controllers/articleController.js";
+import {
+    createArticle,
+    updateArticle,
+    deleteArticle,
+    archiveArticle,
+} from "../controllers/articleController.js";
 import { createAdmin, getAllUsers, getUserById } from "../controllers/userAdminController.js";
 import { deleteRegisteredUser, updateRegisteredUser } from "../controllers/userPublicController.js";
 import {
@@ -52,6 +57,9 @@ export default function exportAdminRoutes(app) {
 
     app.delete("/api/admin/articles/:id", authMiddleware, requireAdmin, (req, res) => {
         deleteArticle(req, res);
+    });
+    app.patch("/api/admin/articles/:id/archive", authMiddleware, requireAdmin, (req, res) => {
+        archiveArticle(req, res);
     });
 
     /* Comments */
