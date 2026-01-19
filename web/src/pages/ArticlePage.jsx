@@ -26,10 +26,8 @@ export default function ArticlePage() {
     if (!data.commentTree) return;
 
     const { title, content, coverUrl, coverAlt, updatedAt } = data.article;
-    console.log("ArticlePage received content:", content);
     const parsedContent = parseArticleContent(content);
     const cleanContent = quillDeltaToCleanHtml(parsedContent);
-    console.log("Clean content:", cleanContent);
 
     return (
         <main className="max-w-6xl mx-auto p-4 space-y-6">

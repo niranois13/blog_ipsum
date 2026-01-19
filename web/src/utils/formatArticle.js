@@ -39,7 +39,6 @@ function getQuillInstance() {
 
 function normalizeDelta(delta) {
     const ops = [];
-    console.log("normalizeDelta received delta:", delta);
 
     for (let i = 0; i < delta.ops.length; i++) {
         const op = delta.ops[i];
@@ -58,8 +57,6 @@ function normalizeDelta(delta) {
         ops.push(op);
     }
 
-    console.log("normalizeDelta output delta:", ops);
-
     return { ops };
 }
 
@@ -71,16 +68,59 @@ export function quillDeltaToCleanHtml(delta) {
     quill.setContents(normalized);
 
     const rawHtml = quill.container.querySelector(".ql-editor").innerHTML;
-    console.log("rawHtml:", rawHtml);
-
     const cleanHtml = DOMPurify.sanitize(rawHtml, {
         USE_PROFILES: { html: true },
         ADD_TAGS: ["iframe"],
-        ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "scrolling"],
+        ADD_ATTR: ["src", "allow", "allowfullscreen", "referrerpolicy", "loading", "sandbox"],
     });
 
-    return cleanHtml.replace(/<iframe[^>]*src="([^"]+)"[^>]*><\/iframe>/g, (match, src) => {
-        if (!src.includes("youtube.com/embed")) return "";
-        return match;
-    });
+    const sanitizedVideoHTML = sanitizeVideos(cleanHtml);
+
+    return sanitizedVideoHTML;
+}
+
+function sanitizeVideos(html) {
+    const container = document.createElement("div");
+    container.innerHTML = html;
+
+    const iframes = container.querySelectorAll("iframe");
+
+    for (const iframe of iframes) {
+        try {
+            const src = iframe.getAttribute("src");
+            if (!src) {
+                iframe.remove();
+                continue;
+            }
+
+            const url = new URL(src);
+
+            const isYoutube =
+                (url.hostname === "www.youtube.com" || url.hostname === "youtube.com") &&
+                url.pathname.startsWith("/embed/");
+
+            if (!isYoutube) {
+                iframe.remove();
+                continue;
+            }
+
+            const videoId = url.pathname.split("/embed/")[1].split("?")[0];
+            const newUrl = `https://www.youtube-nocookie.com/embed/${videoId}?rel=0`;
+            iframe.setAttribute("src", newUrl);
+            iframe.setAttribute("loading", "lazy");
+            iframe.setAttribute(
+                "allow",
+                "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            );
+            iframe.setAttribute("allowfullscreen", "");
+            iframe.setAttribute(
+                "sandbox",
+                "allow-scripts allow-same-origin allow-presentation allow-popups"
+            );
+        } catch {
+            iframe.remove();
+        }
+    }
+
+    return container.innerHTML;
 }
