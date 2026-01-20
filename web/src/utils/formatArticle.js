@@ -46,13 +46,22 @@ function replaceVideoPlaceholders(html) {
 
 function videoPlaceholderHTML() {
     return `
-        <div class="video-placeholder bg-gray-100 border rounded p-4 text-center my-4">
-            <p class="mb-2 text-sm text-gray-700">
-                This video is hosted on YouTube and requires cookie consent.
-            </p>
-            <a href="/privacy" class="underline text-blue-600">
-                Manage privacy settings
-            </a>
+        <div class="relative w-full max-w-[80%] mx-auto aspect-video bg-black rounded-lg overflow-hidden my-4 flex items-center justify-center">
+
+            <div class="absolute inset-0 bg-black/70 flex flex-col items-center justify-center text-center px-6">
+                <div class="mb-4">
+                    <div class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center shadow-lg">
+                        <svg class="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <p class="text-white text-lg font-medium mb-2">Cette vidéo est hébergée sur YouTube</p>
+                <p class="text-gray-300 text-sm mb-4">Vous devez accepter les cookies pour la lire</p>
+
+                <a href="/privacy" class="text-sm text-blue-400 hover:underline">Gérer mes préférences de confidentialité</a>
+            </div>
         </div>
     `;
 }
