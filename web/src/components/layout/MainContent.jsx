@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "../router/ProtectedRoute.jsx";
 
 const Home = lazy(() => import("../../pages/Home.jsx"));
+const Privacy = lazy(() => import("../../pages/Privacy.jsx"));
 const ArticlePage = lazy(() => import("../../pages/ArticlePage.jsx"));
 const AdminArticles = lazy(() => import("../../pages/AdminArticles.jsx"));
 const EditorPage = lazy(() => import("../../pages/EditorPage.jsx"));
@@ -13,6 +14,7 @@ export default function MainContent() {
             <Suspense fallback={<p>Loading page...</p>}>
                 <Routes>
                     <Route path="/" element={<Home />} />
+                    <Route path="/privacy" element={<Privacy />} />
                     <Route path="/article/:id" element={<ArticlePage />} />
                     <Route element={<ProtectedRoute />}>
                         <Route path="/admin/articles" element={<AdminArticles />} />

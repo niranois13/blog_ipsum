@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 const PreferencesContext = createContext();
 
-export default function CookieProvider({ children }) {
+export default function PreferencesProvider({ children }) {
     const [preferencesConsent, setPreferencesConsent] = useState(null);
 
     useEffect(() => {
@@ -15,28 +15,32 @@ export default function CookieProvider({ children }) {
             }
 
             const saved = localStorage.getItem("sitePreferences");
-            if (saved === "true") setPreferencesConsent(true);
-            else if (saved === "false") setPreferencesConsent(false);
+            if (saved === "true") setPreferencesConsent("true");
+            else if (saved === "false") setPreferencesConsent("false");
             else setPreferencesConsent(null);
-        } catch (error) {
-            console.error({ error: error });
+        } catch {
             setPreferencesConsent(null);
         }
     }, []);
 
     const safeSet = (value) => {
         try {
-            if (typeof window !== "undefined" && "localStorage" in window) {
-                window.localStorage.setItem("sitePreferences", value);
-            }
-        } catch (error) {
-            console.error({ error: error });
+            window.localStorage.setItem("sitePreferences", value);
+        } catch {
+            setPreferencesConsent(null);
         }
-        setPreferencesConsent(value === "true");
+        setPreferencesConsent(value);
     };
 
     const acceptPreferences = () => safeSet("true");
+
     const rejectPreferences = () => safeSet("false");
+
+    const revokePreferences = () => {
+        safeSet("false");
+        deleteAllCookies();
+        removeYouTubeIframes();
+    };
 
     return (
         <PreferencesContext.Provider
@@ -44,6 +48,7 @@ export default function CookieProvider({ children }) {
                 preferencesConsent,
                 acceptPreferences,
                 rejectPreferences,
+                revokePreferences,
             }}
         >
             {children}
@@ -53,4 +58,19 @@ export default function CookieProvider({ children }) {
 
 export function usePreferences() {
     return useContext(PreferencesContext);
+}
+
+function deleteAllCookies() {
+    document.cookie.split(";").forEach((cookie) => {
+        const name = cookie.split("=")[0].trim();
+        document.cookie = `${name}=; Max-Age=0; path=/`;
+    });
+}
+
+function removeYouTubeIframes() {
+    document.querySelectorAll("iframe").forEach((iframe) => {
+        if (iframe.src.includes("youtube")) {
+            iframe.remove();
+        }
+    });
 }
