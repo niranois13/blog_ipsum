@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useGetArticleById } from "../hooks/article/useGetArticleById";
 import CommentList from "../components/features/Comment/CommentList";

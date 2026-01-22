@@ -5,7 +5,7 @@ export default function Privacy() {
         usePreferences();
 
     return (
-        <main className="max-w-4xl mx-auto p-6 space-y-8">
+        <main className="max-w-4xl mx-auto p-6 space-y-8 text-justify">
             <h1 className="text-4xl font-bold">Politique de confidentialité</h1>
 
             {/* Données personnelles */}
@@ -29,23 +29,24 @@ export default function Privacy() {
 
                 <h3 className="font-medium">Cloudinary</h3>
                 <p>
-                    Cloudinary est utilisé uniquement pour l’hébergement et la diffusion d’images.
-                    Ce service ne dépose aucun cookie et ne collecte aucune donnée sur les visiteurs
-                    du site.
+                    <em>Cloudinary</em> est utilisé uniquement pour l’hébergement et la diffusion
+                    d’images. Ce service ne dépose aucun cookie et ne collecte aucune donnée sur les
+                    visiteurs du site.
                 </p>
 
                 <h3 className="font-medium mt-4">YouTube</h3>
                 <p>
-                    Les vidéos sont hébergées sur YouTube. Ce service peut déposer des cookies et
-                    collecter des données à des fins de suivi et de personnalisation.
+                    Les vidéos sont hébergées sur <em>YouTube</em>. Ce service peut déposer des
+                    cookies et collecter des données à des fins de suivi et de personnalisation.
                 </p>
                 <p>
-                    Nous utilisons la version Youtube-nocookie qui limite au maximum les données
-                    collectées par ce service.
+                    Nous utilisons la version <strong>Youtube-nocookie</strong> qui limite au
+                    maximum les données collectées par ce service.
                 </p>
                 <p>
-                    Les vidéos YouTube ne sont chargées qu’après acceptation explicite des cookies.
-                    Sans consentement, un simple emplacement est affiché à la place de la vidéo.
+                    Les vidéos <em>YouTube</em> ne sont chargées qu’après acceptation explicite des
+                    cookies. Sans consentement, un simple emplacement est affiché à la place de la
+                    vidéo.
                 </p>
             </section>
 
@@ -57,7 +58,8 @@ export default function Privacy() {
                     <>
                         <p>
                             Vous avez actuellement accepté l’utilisation des cookies nécessaires à
-                            l’affichage des vidéos YouTube et à la publication de commentaires.
+                            l’affichage des vidéos <em>YouTube</em> et à la publication de
+                            commentaires.
                         </p>
                         <button
                             onClick={revokePreferences}
@@ -71,8 +73,8 @@ export default function Privacy() {
                 {preferencesConsent === "false" && (
                     <>
                         <p>
-                            Vous avez refusé l’utilisation des cookies. Les vidéos YouTube et la
-                            publication de commentaires sont désactivées.
+                            Vous avez refusé l’utilisation des cookies. Les vidéos <em>YouTube</em>
+                            et la publication de commentaires sont désactivées.
                         </p>
                         <button
                             onClick={acceptPreferences}
@@ -87,7 +89,7 @@ export default function Privacy() {
                     <>
                         <p>
                             Vous n’avez pas encore choisi si vous souhaitez autoriser les cookies
-                            pour les vidéos YouTube et les commentaires.
+                            pour les vidéos <em>YouTube</em> et les commentaires.
                         </p>
                         <div className="flex gap-4">
                             <button
@@ -110,9 +112,9 @@ export default function Privacy() {
             {/* Info légale */}
             <section className="text-sm text-gray-500">
                 <p>
-                    Note : Les cookies déposés directement par YouTube ou Google ne peuvent pas être
-                    supprimés par ce site. Leur suppression ou gestion peut être effectuée via les
-                    paramètres de votre navigateur.
+                    Note : Les cookies déposés directement par <em>YouTube</em> ou <em>Google</em>
+                    ne peuvent pas être supprimés par ce site. Leur suppression ou gestion peut être
+                    effectuée via les paramètres de votre navigateur.
                 </p>
             </section>
         </main>
