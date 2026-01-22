@@ -1,12 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useGetArticleById } from "../hooks/article/useGetArticleById";
 import CommentList from "../components/features/Comment/CommentList";
 import { parseArticleContent, quillDeltaToCleanHtml } from "../utils/formatArticle";
+import { usePreferences } from "../context/PreferencesContext";
+import VideoPlaceholder from "../components/ui/VideoPlaceholder";
+import hydrateVideoPlaceholder from "../utils/hydrateVideoPlaceholder";
 
 export default function ArticlePage() {
     const { id } = useParams();
     const { data, isLoading, isError, error } = useGetArticleById(id);
+    const { preferencesConsent } = usePreferences();
+
+    const articleRef = useRef(null);
 
     useEffect(() => {
         const link = document.createElement("link");
@@ -20,14 +26,25 @@ export default function ArticlePage() {
         };
     }, []);
 
+    useEffect(() => {
+        if (!articleRef.current) return;
+        console.log("Hydrating placeholders in:", articleRef.current);
+        console.log(
+            "Article ref current:",
+            articleRef.current.querySelectorAll("[data-video-placeholder-react]")
+        );
+        hydrateVideoPlaceholder(articleRef.current, <VideoPlaceholder />);
+    }, [data, preferencesConsent]);
+
     if (isLoading) return <p>Loading article...</p>;
     if (isError) return <p>Error: {error?.message || "Could not fetch article."}</p>;
     if (!data.article) return <p>Article not found</p>;
     if (!data.commentTree) return;
 
     const { title, content, coverUrl, coverAlt, updatedAt } = data.article;
+    console.log("Initial content:", content);
     const parsedContent = parseArticleContent(content);
-    const cleanContent = quillDeltaToCleanHtml(parsedContent);
+    const cleanContent = quillDeltaToCleanHtml(parsedContent, preferencesConsent);
 
     return (
         <main className="max-w-6xl mx-auto p-4 space-y-6">
@@ -45,7 +62,11 @@ export default function ArticlePage() {
                 <h2 className="text-4xl font-bold">{title}</h2>
                 <p className="text-sm text-gray-500 -mt-5">Last updated: {updatedAt}</p>
                 <article className="ql-snow">
-                    <div className="ql-editor" dangerouslySetInnerHTML={{ __html: cleanContent }} />
+                    <div
+                        ref={articleRef}
+                        className="ql-editor"
+                        dangerouslySetInnerHTML={{ __html: cleanContent }}
+                    />
                 </article>
 
                 <section className="max-w-2xl mx-auto">
