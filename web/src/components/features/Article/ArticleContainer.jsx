@@ -7,7 +7,6 @@ export default function ArticleContainer() {
     if (isLoading) return <p>Loading latest article</p>;
     if (!data) return <p>No article found</p>;
     const { latestArticle, otherLatestArticles } = data;
-    if (!data?.latestArticle || !data?.otherLatestArticles) return <p>No article found</p>;
 
     return (
         <section
@@ -20,9 +19,15 @@ export default function ArticleContainer() {
             "
         >
             {latestArticle && <NewArticleCard {...latestArticle} className="md:col-span-3" />}
-            {otherLatestArticles[0] && <ArticleCard {...otherLatestArticles[0]} />}
-            {otherLatestArticles[1] && <ArticleCard {...otherLatestArticles[1]} />}
-            {otherLatestArticles[2] && <ArticleCard {...otherLatestArticles[2]} />}
+            {otherLatestArticles ? (
+                <>
+                    {otherLatestArticles[0] ? <ArticleCard {...otherLatestArticles[0]} /> : null}
+                    {otherLatestArticles[1] ? <ArticleCard {...otherLatestArticles[1]} /> : null}
+                    {otherLatestArticles[2] ? <ArticleCard {...otherLatestArticles[2]} /> : null}
+                </>
+            ) : (
+                <p>No other article found</p>
+            )}
         </section>
     );
 }
