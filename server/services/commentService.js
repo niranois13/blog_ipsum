@@ -1,4 +1,3 @@
-import { Sequelize } from "sequelize";
 import buildCommentTree from "../utils/buildCommentTree.js";
 import { myError } from "../utils/errors.js";
 
@@ -12,13 +11,19 @@ export async function createCommentService(data, models) {
         articleId: data.articleId,
     });
 
-    const commentStats = await CommentStats.upsert({
-        userId: data.userId,
-        totalComments: Sequelize.literal("totalComments + 1"),
-        lastCommentAt: new Date(),
-    });
+    await CommentStats.upsert(
+        {
+            userId: data.userId,
+            totalComments: 1,
+            lastCommentAt: new Date(),
+        },
+        {
+            fields: ["userId", "totalComments", "lastCommentAt"],
+            updatOnDuplicate: ["totalComments", "lastCommentAt"],
+        }
+    );
 
-    return [comment, commentStats];
+    return [comment];
 }
 
 export async function getAllCommentsService(models) {
