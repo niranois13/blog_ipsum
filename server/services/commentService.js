@@ -1,6 +1,8 @@
-import { Sequelize } from "sequelize";
-import buildCommentTree from "../utils/buildCommentTree.js";
-import { myError } from "../utils/errors.js";
+// import buildCommentTree from "../utils/buildCommentTree.js";
+// import { myError } from "../utils/errors.js";
+import { redisClient } from "../redis/redisClient.js";
+
+const redis = redisClient;
 
 export async function createCommentService(data, models) {
     const { Comment, CommentStats } = models;
@@ -12,55 +14,64 @@ export async function createCommentService(data, models) {
         articleId: data.articleId,
     });
 
-    const commentStats = await CommentStats.upsert({
-        userId: data.userId,
-        totalComments: Sequelize.literal("totalComments + 1"),
-        lastCommentAt: new Date(),
-    });
+    await CommentStats.upsert(
+        {
+            userId: data.userId,
+            totalComments: 1,
+            lastCommentAt: new Date(),
+        },
+        {
+            fields: ["userId", "totalComments", "lastCommentAt"],
+            updatOnDuplicate: ["totalComments", "lastCommentAt"],
+        }
+    );
 
-    return [comment, commentStats];
+    await redis.del(`article:${data.articleId}`);
+    await redis.del(`article:${data.articleId}:comments`);
+
+    return [comment];
 }
+// TODO: Implement hands-on comment moderation:
+// export async function getAllCommentsService(models) {
+//     const { Comment } = models;
 
-export async function getAllCommentsService(models) {
-    const { Comment } = models;
+//     const comments = await Comment.findAll({
+//         order: [["createdAt", "ASC"]],
+//     });
+//     if (!comments) throw new myError("No comment found", 404);
 
-    const comments = await Comment.findAll({
-        order: [["createdAt", "ASC"]],
-    });
-    if (!comments) throw new myError("No comment found", 404);
+//     const commentTree = buildCommentTree(comments);
 
-    const commentTree = buildCommentTree(comments);
+//     return commentTree;
+// }
 
-    return commentTree;
-}
+// export async function getCommentByIdService(commentId, models) {
+//     const { Comment } = models;
 
-export async function getCommentByIdService(commentId, models) {
-    const { Comment } = models;
+//     const comment = await Comment.findByPk(commentId);
+//     if (!comment) throw new myError("No comment found", 404);
 
-    const comment = await Comment.findByPk(commentId);
-    if (!comment) throw new myError("No comment found", 404);
+//     return comment;
+// }
 
-    return comment;
-}
+// export async function deleteCommentByIdService(commentId, models) {
+//     const { Comment } = models;
 
-export async function deleteCommentByIdService(commentId, models) {
-    const { Comment } = models;
+//     const comment = await Comment.findByPk(commentId);
+//     if (!comment) throw new myError("No comment found", 404);
 
-    const comment = await Comment.findByPk(commentId);
-    if (!comment) throw new myError("No comment found", 404);
+//     comment.destroy();
 
-    comment.destroy();
+//     return comment;
+// }
 
-    return comment;
-}
+// export async function updateCommentByIdService(commentId, data, models) {
+//     const { Comment } = models;
 
-export async function updateCommentByIdService(commentId, data, models) {
-    const { Comment } = models;
+//     const comment = await Comment.findByPk(commentId);
+//     if (!comment) throw new myError("Comment not found", 404);
 
-    const comment = await Comment.findByPk(commentId);
-    if (!comment) throw new myError("Comment not found", 404);
+//     await comment.update(data);
 
-    await comment.update(data);
-
-    return comment;
-}
+//     return comment;
+// }

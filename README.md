@@ -21,10 +21,6 @@ Finally, accessibility will be inforced.
 
 * ESLint
 * Prettier
-* Jest (to come)
-* Supertest (to come)
-
-- Back-end:
 
 * NodeJS
 * Express
@@ -33,14 +29,14 @@ Finally, accessibility will be inforced.
 * MySQL
 * jsonwebtoken
 * cookie-parser
+* Test are runned through Vitest + Supertest
 
-- Front-end (not started yet):
+- Front-end:
 
 * React
 * TanStack Query
-* Zod
-* Quill ()
-* GlinProfanity (local)
+* Quill
+* GlinProfanity (local - to come)
 
 ### Architecure
 
@@ -58,6 +54,8 @@ Clone this repository:
 `git clone https://github.com/niranois13/blog_ipsum.git`
 
 Rename `.env-example` as `.env` and replace placeholder values to real ones __(never push a .env <3)__
+For testing purposes, you will need to copy your `.env` into `/server/` (`cp .env /server/`),
+otherwise Vitest won't have access to your environment variables.
 
 Then, while at project's root, run:
 `npm run dev`, a script that will run `docker-compose up --build`
@@ -72,12 +70,13 @@ You can now test the project at `localhost/`, the api running on `localhost/api/
 * `npm run format` to check and fix code format thanks to Prettier only.
 * `npm run stop` to fully stop the Docker containers (volumes are safe).
 * `npm run build` to build the Docke image, without running it.
-* `npm run test` to run jest tests. Not implemented yet.
+* `npm run test` to run vitest tests.
+* `npm run test:coverage` to run test and see an overall test coverage output.
 
 
 ## Features
 
-- Admin panel with a WYSIWYG text editor: Quill, in order to create and manage articles. Also a comment management system.
-- The possibility for visitors to post comments. Those comments are moderated with glin-profanity, some RegEx and some spam limitations and bot control.
+- Admin panel with a WYSIWYG text editor: Quill, in order to create and manage articles. Also a comment management system (WIP).
+- The possibility for visitors to post comments. Those comments are moderated with glin-profanity (WIP), some RegEx and some spam limitations and bot control.
 - Everything is stored in a MySQL database, except for article's cover images that are stored on Cloudinary.
-- Room for scalability. 
+- Room for scalability.

@@ -28,7 +28,6 @@ export default function ArticlePage() {
     if (!data.commentTree) return;
 
     const { title, content, coverUrl, coverAlt, updatedAt } = data.article;
-    console.log("Initial content:", content);
     const parsedContent = parseArticleContent(content);
     const cleanContent = quillDeltaToCleanHtml(parsedContent, preferencesConsent);
 

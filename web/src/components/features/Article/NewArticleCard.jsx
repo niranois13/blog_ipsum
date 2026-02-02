@@ -20,7 +20,6 @@ export default function NewArticleCard({
     const archiveMutation = useArchiveArticle();
 
     const handleArchive = () => {
-        console.log("archiveMutation called");
         archiveMutation.mutate(id);
     };
 

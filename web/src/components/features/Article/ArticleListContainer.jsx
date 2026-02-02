@@ -6,7 +6,6 @@ export default function ArticleListContainer() {
     const { data, isLoading } = useGetHomepageArticles();
     if (isLoading) return <p>Loading latest article</p>;
     if (!data) return <p>No article found</p>;
-    console.log("data received by ArticleListContainer:", data);
     const { randomArticles } = data;
 
     return (
