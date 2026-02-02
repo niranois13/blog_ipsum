@@ -3,11 +3,24 @@ import { Op, Sequelize } from "sequelize";
 export async function handleRejectedCommentService(userId, models) {
     const { CommentStats } = models;
 
-    await CommentStats.upsert({
-        userId,
-        totalRejected: Sequelize.literal("totalRejected + 1"),
-        lastCommentAt: new Date(),
+    const [stats] = await CommentStats.findOrCreate({
+        where: { userId },
+        defaults: {
+            totalComments: 0,
+            totalRejected: 0,
+            lastCommentAt: new Date(),
+        },
     });
+
+    await stats.increment(
+        {
+            totalComments: 1,
+            totalRejected: 1,
+        },
+        { silent: true }
+    );
+
+    await stats.update({ lastCommentAt: new Date() });
 }
 
 export async function getSusActivityService(models) {

@@ -129,22 +129,15 @@ export async function getHomepageArticles(req, res) {
         const articlesData = articles?.Articles;
         if (!articlesData) return res.status(404).json({ error: "No article found" });
 
-        const { latestArticle, otherLatestArticles, allOtherArticles } = articlesData;
-        if (!latestArticle || latestArticle.length === 0)
-            return res.status(404).json({ error: "No article found" });
+        const { latestArticle, otherLatestArticles = [], allOtherArticles = [] } = articlesData;
+
         const serializedLatestArticle = latestArticle ? serializeArticle(latestArticle) : null;
+        const serializedOtherLatestArticles =
+            otherLatestArticles.length > 0 ? otherLatestArticles.map(serializeArticle) : null;
+        const serializedAllOtherArticles =
+            allOtherArticles.length > 0 ? allOtherArticles.map(serializeArticle) : null;
 
-        if (!otherLatestArticles || otherLatestArticles.length === 0)
-            return res.status(404).json({ error: "Not found" });
-        const serializedOtherLatestArticles = otherLatestArticles
-            ? otherLatestArticles.map(serializeArticle)
-            : null;
-
-        if (!allOtherArticles || allOtherArticles.length === 0)
-            return res.status(404).json({ error: "Not found" });
-        const serializedAllOtherArticles = allOtherArticles
-            ? allOtherArticles.map(serializeArticle)
-            : null;
+        if (!serializedLatestArticle) return res.status(404).json({ error: "No article found" });
 
         return res.status(200).json({
             latestArticle: serializedLatestArticle,

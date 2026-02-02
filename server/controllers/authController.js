@@ -13,9 +13,6 @@ export async function loginUser(req, res) {
 
     try {
         const { user, token } = await loginUserService(email, password, models);
-        if (!user || !token) {
-            return res.status(400).json({ error: "Invalid credentials." });
-        }
 
         generateCookie(res, token);
 
@@ -46,9 +43,6 @@ export async function getMe(req, res) {
         const decoded = verifyToken(token);
 
         const user = await getUserByIdService(decoded.id, models);
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
 
         return res.status(200).json({ user });
     } catch (error) {
