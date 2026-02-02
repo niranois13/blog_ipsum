@@ -8,6 +8,8 @@ services:
             DB_USER: ${DB_USER}
             DB_PASSWORD: ${DB_PASSWORD}
             DB_NAME: ${DB_NAME}
+            REDIS_HOST: ${REDIS_HOST}
+            REDIS_PORT: ${REDIS_PORT}
         container_name: server
         volumes:
             - ./server:/blog_ipsum/server
@@ -19,6 +21,15 @@ services:
         depends_on:
             db:
                 condition: service_healthy
+            redis:
+                condition: service_started
+
+    redis:
+        image: redis:7-alpine
+        container_name: redis
+        ports:
+            - "6379:6379"
+        command: redis-server --save "" --appendonly no
 
     web:
         build:
