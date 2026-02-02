@@ -18,11 +18,21 @@ export async function resolveUser(req, res, next) {
     }
 
     let visitorId = req.cookies?.visitor_id;
+    let visitor = null;
+
+    if (visitorId) {
+        visitor = await User.findByPk(visitorId);
+    }
+
+    if (visitorId && !visitor) {
+        res.clearCookie("visitor_id");
+        visitorId = null;
+    }
 
     if (!visitorId) {
         const username = generateRandomUsername();
 
-        const visitor = await User.create({
+        visitor = await User.create({
             username,
             role: "VISITOR",
         });
@@ -35,12 +45,6 @@ export async function resolveUser(req, res, next) {
 
         req.user = visitor;
         return next();
-    }
-
-    const visitor = await User.findByPk(visitorId);
-    if (!visitor) {
-        res.clearCookie("visitor_id");
-        return resolveUser(req, res, next);
     }
 
     req.user = visitor;

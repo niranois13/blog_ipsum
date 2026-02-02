@@ -12,7 +12,6 @@ export default function ArticleCard({ id, title, summary, coverUrl, coverAlt, up
     const archiveMutation = useArchiveArticle();
 
     const handleArchive = () => {
-        console.log("archiveMutation called");
         archiveMutation.mutate(id);
     };
 
