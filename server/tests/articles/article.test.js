@@ -3,7 +3,8 @@ import { describe, it, beforeAll, expect } from "vitest";
 import { createApp } from "../../src/app.js";
 import { models } from "../setup.js";
 import { createTestAdmin } from "../helpers/createTestAdmin.js";
-import { validQuillContent, invalidQuillContent } from "../helpers/quillContent.js";
+import { validQuillContent } from "../helpers/quillContent.js";
+import { invalidArticleCases } from "./invalidArticleCases.js";
 
 let app;
 let publicApp;
@@ -22,6 +23,16 @@ describe("Articles API", () => {
             .send({ email: admin.email, password: "plain-password" });
 
         adminCookie = loginRes.headers["set-cookie"];
+    });
+
+    it.each(invalidArticleCases)("rejects article creation when $name", async ({ body, error }) => {
+        const res = await request(app)
+            .post("/api/admin/articles")
+            .set("Cookie", adminCookie)
+            .send(body);
+
+        expect(res.status).toBe(400);
+        expect(res.body.error).toMatch(error);
     });
 
     /* ------------------------------------------------------------------ */
@@ -57,57 +68,13 @@ describe("Articles API", () => {
             articleId = res.body.article.id;
         });
 
-        it("rejects invalid quill content", async () => {
-            const res = await request(app)
-                .post("/api/admin/articles")
-                .set("Cookie", adminCookie)
-                .send({
-                    title: "Invalid content",
-                    summary: "Summary",
-                    content: invalidQuillContent(),
-                    status: "DRAFT",
-                });
-
-            expect(res.status).toBe(400);
-        });
-
-        it("rejects stringified invalid JSON content", async () => {
-            const res = await request(app)
-                .post("/api/admin/articles")
-                .set("Cookie", adminCookie)
-                .send({
-                    title: "Bad JSON",
-                    summary: "Oops",
-                    content: "{not-json}",
-                    status: "DRAFT",
-                });
-
-            expect(res.status).toBe(400);
-            expect(res.body.error).toMatch(/Invalid content format/i);
-        });
-
-        it("rejects invalid article status", async () => {
-            const res = await request(app)
-                .post("/api/admin/articles")
-                .set("Cookie", adminCookie)
-                .send({
-                    title: "Bad status",
-                    summary: "Test",
-                    content: validQuillContent(),
-                    status: "DELETED",
-                });
-
-            expect(res.status).toBe(400);
-            expect(res.body.error).toMatch(/Invalid status/i);
-        });
-
         it("auto-formats title and summary if invalid", async () => {
             const res = await request(app)
                 .post("/api/admin/articles")
                 .set("Cookie", adminCookie)
                 .send({
-                    title: "", // invalide
-                    summary: "", // invalide
+                    title: "",
+                    summary: "",
                     content: validQuillContent(),
                     status: "DRAFT",
                 });
@@ -116,105 +83,11 @@ describe("Articles API", () => {
             expect(res.body.article.title).toMatch(/^New article:/);
             expect(res.body.article.summary).toMatch(/Enter a valid summary/);
         });
-
-        it("rejects published article without cover", async () => {
-            const res = await request(app)
-                .post("/api/admin/articles")
-                .set("Cookie", adminCookie)
-                .send({
-                    title: "Published article",
-                    summary: "Summary",
-                    content: validQuillContent(),
-                    status: "PUBLISHED",
-                });
-
-            expect(res.status).toBe(400);
-            expect(res.body.error).toMatch(/Cover is required/i);
-        });
-
-        it("rejects draft article with invalid cover", async () => {
-            const res = await request(app)
-                .post("/api/admin/articles")
-                .set("Cookie", adminCookie)
-                .send({
-                    title: "draft article",
-                    summary: "Summary",
-                    content: validQuillContent(),
-                    status: "DRAFT",
-                    coverID: 42,
-                    coverAlt: "coverAlt",
-                });
-
-            expect(res.status).toBe(400);
-            expect(res.body.error).toMatch(/valid Cloudinary URL/i);
-        });
-
-        it("rejects draft with cover but missing alt", async () => {
-            const res = await request(app)
-                .post("/api/admin/articles")
-                .set("Cookie", adminCookie)
-                .send({
-                    title: "Draft article",
-                    summary: "Summary",
-                    content: validQuillContent(),
-                    status: "DRAFT",
-                    coverID: "cloudinary://image",
-                });
-
-            expect(res.status).toBe(400);
-            expect(res.body.error).toMatch(/alt field/i);
-        });
-
-        it("rejects published with cover but missing alt", async () => {
-            const res = await request(app)
-                .post("/api/admin/articles")
-                .set("Cookie", adminCookie)
-                .send({
-                    title: "Published article",
-                    summary: "Summary",
-                    content: validQuillContent(),
-                    status: "PUBLISHED",
-                    coverID: "cloudinary://image",
-                });
-
-            expect(res.status).toBe(400);
-            expect(res.body.error).toMatch(/alt field/i);
-        });
-
-        it("rejects an article without status", async () => {
-            const res = await request(app)
-                .post("/api/admin/articles")
-                .set("Cookie", adminCookie)
-                .send({
-                    title: "Draft article",
-                    summary: "Summary",
-                    content: validQuillContent(),
-                    coverID: "cloudinary://image",
-                });
-
-            expect(res.status).toBe(400);
-            expect(res.body.error).toMatch(/Missing Parameters/i);
-        });
-
-        it("rejects an article without content", async () => {
-            const res = await request(app)
-                .post("/api/admin/articles")
-                .set("Cookie", adminCookie)
-                .send({
-                    title: "Draft article",
-                    summary: "Summary",
-                    status: "DRAFT",
-                    coverID: "cloudinary://image",
-                });
-
-            expect(res.status).toBe(400);
-            expect(res.body.error).toMatch(/Missing Parameters/i);
-        });
     });
 });
 
 /* ------------------------------------------------------------------ */
-/* GET ALL ARTICLES */
+/* GET ARTICLES */
 /* ------------------------------------------------------------------ */
 describe("GET /api/admin/articles", () => {
     it("returns list of articles", async () => {
@@ -226,9 +99,6 @@ describe("GET /api/admin/articles", () => {
     });
 });
 
-/* ------------------------------------------------------------------ */
-/* GET ARTICLE BY ID */
-/* ------------------------------------------------------------------ */
 describe("GET /api/admin/articles/:id", () => {
     it("returns article by id", async () => {
         const res = await request(publicApp).get(`/api/articles/${articleId}`);
@@ -273,9 +143,6 @@ describe("PUT /api/admin/articles/:id", () => {
     });
 });
 
-/* ------------------------------------------------------------------ */
-/* ARCHIVE ARTICLE */
-/* ------------------------------------------------------------------ */
 describe("PATCH /api/admin/articles/:id/archive", () => {
     it("archives article as admin", async () => {
         const res = await request(app)
@@ -306,6 +173,9 @@ describe("DELETE /api/admin/articles/:id", () => {
     });
 });
 
+/* ------------------------------------------------------------------ */
+/* HOMEPAGE SPECIFICS */
+/* ------------------------------------------------------------------ */
 describe("Articles API - Homepage specifics", () => {
     beforeAll(async () => {
         app = createApp(models);
