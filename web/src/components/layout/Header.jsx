@@ -29,14 +29,14 @@ export default function Header() {
                                 divClassName="text-light font-sans font-bold"
                                 txtClassName="sr-only md:not-sr-only"
                             />
-                            <AdminButton
+                            {/* <AdminButton
                                 Icon={MessageCircleCode}
                                 IconSize={24}
                                 buttonText="Manage Comments"
                                 onClick="/admin/comments/"
                                 divClassName="text-light font-sans font-bold"
                                 txtClassName="sr-only md:not-sr-only"
-                            />
+                            /> */}
                         </div>
                     )}
                 </div>

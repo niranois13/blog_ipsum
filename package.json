@@ -4,15 +4,14 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
         "lint": "eslint . --ext .js,.jsx",
         "lint:fix": "eslint . --ext .js,.jsx --fix",
         "format": "prettier --write .",
-        "dev": "docker compose up --build",
+        "dev": "docker compose --env-file .env up --build",
+        "prod": "docker compose --env-file .env.prod up --build",
         "up": "docker compose up",
         "stop": "docker compose down",
-        "build": "docker compose build",
-        "test:docker": "docker compose -f docker-compose.test.yml up -d db_test"
+        "build": "docker compose build"
     },
     "keywords": [],
     "author": "",
